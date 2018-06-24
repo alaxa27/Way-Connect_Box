@@ -1,0 +1,14 @@
+__pycache__
+
+media/
+samples/
+
+.env/
+venv/
+
+*.pyc
+*.sqlite3
+
+gc_credentials.json
+
+
