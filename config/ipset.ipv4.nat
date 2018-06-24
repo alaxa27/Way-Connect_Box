@@ -1,0 +1,2 @@
+create fb hash:ip family inet hashsize 1024 maxelem 65536
+create wc hash:ip family inet hashsize 1024 maxelem 65536
