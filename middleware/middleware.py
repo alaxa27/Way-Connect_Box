@@ -36,8 +36,6 @@ def catch_all(path):
         data = request.get_json()
     headers['X-API-Sign'] = sign(API_KEY, API_SECRET, data)
 
-    print(headers['X-API-Sign'])
-
     params = {}
     for key, value in request.args.items():
         params[key] = value
