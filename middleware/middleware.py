@@ -24,29 +24,29 @@ def sign(public_key, secret_key, data):
 @app.route('/<path:path>', methods=['POST', 'GET'])
 def catch_all(path):
     url = API_URL + path
+
+    data = {}
+    if request.get_json() is not None:
+        data = request.get_json()
+
+    signature = sign(API_KEY, API_SECRET, data)
+
     headers = {}
     for key, value in request.headers.items():
         headers[key] = value
 
     headers['Host'] = API_HOST
     headers['X-API-Key'] = API_KEY
-    if request.get_json() is None:
-        data = {}
-    else:
-        data = request.get_json()
-    headers['X-API-Sign'] = sign(API_KEY, API_SECRET, data)
+    headers['X-API-Sign'] = signature
 
     params = {}
     for key, value in request.args.items():
         params[key] = value
 
-    if request.method == 'POST':
-        response = requests.post(url, data=data, headers=headers)
-    elif request.method == 'GET':
-        response = requests.get(url, params=params, headers=headers)
-    else:
-        return '400'
-    return response.text
+    esreq = requests.Request(method=request.method, url=url, data=request.data, params=params, headers=headers)
+    resp = requests.Session().send(esreq.prepare())
+
+    return (resp.text, resp.status_code, resp.headers.items())
 
 if __name__ == '__main__':
     app.run()
