@@ -20,8 +20,8 @@ def sign(public_key, secret_key, data):
     h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
     return str(h.hexdigest())
 
-@app.route('/', methods=['POST', 'GET', 'PATCH'], defaults={'path': ''})
-@app.route('/<path:path>', methods=['POST', 'GET', 'PATCH'])
+@app.route('/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
+@app.route('/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
     url = API_URL + path
 
