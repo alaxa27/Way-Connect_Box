@@ -20,8 +20,8 @@ def sign(public_key, secret_key, data):
     h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
     return str(h.hexdigest())
 
-@app.route('/', methods=['POST', 'GET'], defaults={'path': ''})
-@app.route('/<path:path>', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET', 'PATCH'], defaults={'path': ''})
+@app.route('/<path:path>', methods=['POST', 'GET', 'PATCH'])
 def catch_all(path):
     url = API_URL + path
 
@@ -29,7 +29,14 @@ def catch_all(path):
     if request.get_json() is not None:
         data = request.get_json()
 
-    signature = sign(API_KEY, API_SECRET, data)
+    params = {}
+    for key, value in request.args.items():
+        params[key] = value
+
+    if request.method == 'GET':
+        signature = sign(API_KEY, API_SECRET, params)
+    else:
+        signature = sign(API_KEY, API_SECRET, data)
 
     headers = {}
     for key, value in request.headers.items():
@@ -38,10 +45,6 @@ def catch_all(path):
     headers['Host'] = API_HOST
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
-
-    params = {}
-    for key, value in request.args.items():
-        params[key] = value
 
     esreq = requests.Request(method=request.method, url=url, data=request.data, params=params, headers=headers)
     resp = requests.Session().send(esreq.prepare())
