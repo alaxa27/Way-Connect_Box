@@ -13,7 +13,7 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
 
     if [ $REMOTE_VERSION -gt $CURRENT_VERSION ]; then
       # Install the upgrade
-      sh -c "$ROOTDIR/Way-Connect_Box/install.sh"
+      sh -c "$ROOTDIR/Way-Connect_Box/patch.sh"
     fi
   fi
 
