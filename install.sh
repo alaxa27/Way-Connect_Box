@@ -17,3 +17,6 @@ systemctl enable middleware
 
 cp way-box-update ../
 cp env ../
+
+git config --global user.email "a@a.a"
+git config --global user.name "a"
