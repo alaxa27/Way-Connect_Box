@@ -20,7 +20,7 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
       mv $ROOTDIR/way-box-update.remote $ROOTDIR/way-box-update
       rmdir $ROOTDIR/update.lock
       sleep 1
-      /sbin/shutdown -r +5
+      /sbin/shutdown -r now
     fi
     rm $ROOTDIR/way-box-update.remote
   fi
