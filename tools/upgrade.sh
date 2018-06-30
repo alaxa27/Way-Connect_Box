@@ -10,14 +10,14 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
     CURRENT_VERSION=$VERSION
     . ${ROOTDIR}/way-box-update.remote
     REMOTE_VERSION=$VERSION
+    rmdir $ROOTDIR/way-box-update.remote
 
     if [ $REMOTE_VERSION -gt $CURRENT_VERSION ]; then
       # Install the upgrade
       sh -c "$ROOTDIR/Way-Connect_Box/patch.sh"
+      reboot
     fi
   fi
 
   rmdir $ROOTDIR/update.lock
-  rmdir $ROOTDIR/way-box-update.remote
-  # reboot
 fi
