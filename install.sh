@@ -15,7 +15,11 @@ ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
 systemctl enable middleware
 
+echo "0 5 * * * /home/pi/Way-Connect_Box/tools/upgrade.sh" >> cron
+crontab cron
+rm cron
 cp way-box-update ../
+
 cp env ../
 
 git config --global user.email "a@a.a"
