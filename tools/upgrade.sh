@@ -3,7 +3,7 @@
 ROOTDIR="/home/pi"
 
 if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
-  if [ -f ${ROOTDIR}/.way-box-update ]; then
+  if [ -f ${ROOTDIR}/way-box-update ]; then
     wget -O "$ROOTDIR/way-box-update.remote" https://raw.githubusercontent.com/alaxa27/Way-Connect_Box/master/way-box-update
 
     . ${ROOTDIR}/way-box-update
@@ -19,5 +19,5 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
 
   rmdir $ROOTDIR/update.lock
   rmdir $ROOTDIR/way-box-update.remote
-  reboot
+  # reboot
 fi
