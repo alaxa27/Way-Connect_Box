@@ -19,6 +19,7 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
       rm $ROOTDIR/way-box-update
       mv $ROOTDIR/way-box-update.remote $ROOTDIR/way-box-update
     fi
+    $ROOTDIR/way-box-update.remote
   fi
   rmdir $ROOTDIR/update.lock
   reboot
