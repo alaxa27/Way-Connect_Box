@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
-$ROOTDIR = "/home/pi"
+ROOTDIR="/home/pi"
 
 if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
   if [ -f ${ROOTDIR}/.way-box-update ]; then
     wget -O "$ROOTDIR/way-box-update.remote" https://raw.githubusercontent.com/alaxa27/Way-Connect_Box/master/way-box-update
 
     . ${ROOTDIR}/way-box-update
-    $CURRENT_VERSION  = $VERSION
+    CURRENT_VERSION=$VERSION
     . ${ROOTDIR}/way-box-update.remote
-    $REMOTE_VERSION  = $VERSION
+    REMOTE_VERSION=$VERSION
 
     if [ $REMOTE_VERSION -gt $CURRENT_VERSION ]; then
       # Install the upgrade
