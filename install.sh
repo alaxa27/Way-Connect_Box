@@ -16,7 +16,6 @@ systemctl daemon-reload
 systemctl enable middleware
 
 echo "0 5 * * * /home/pi/Way-Connect_Box/tools/upgrade.sh" >> cron
-echo "@reboot /home/pi/Way-Connect_Box/tools/upgrade.sh" >> cron
 crontab cron
 rm cron
 cp way-box-update ../
