@@ -14,3 +14,6 @@ cp -R config/* /etc/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
 systemctl enable middleware
+
+cp way-box-update ../
+cp env ../
