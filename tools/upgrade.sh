@@ -18,10 +18,9 @@ if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
       sh -c "$ROOTDIR/Way-Connect_Box/patch.sh"
       rm $ROOTDIR/way-box-update
       mv $ROOTDIR/way-box-update.remote $ROOTDIR/way-box-update
-      reboot
     fi
     rm $ROOTDIR/way-box-update.remote
   fi
-
   rmdir $ROOTDIR/update.lock
+  reboot
 fi
