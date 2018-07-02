@@ -32,7 +32,7 @@ Or just append them to the authentication link:
 
 <script type='text/javascript'>
   var target = getQueryVariable("target");
-  if (!target) {
+  if (target === undefined) {
     target = "gateway"
   }
   window.location="http://portal.way-connect.com/#/portal/" + target + "/$clientmac/$tok"
