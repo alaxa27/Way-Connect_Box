@@ -2,4 +2,4 @@
 
 echo "Applying patch 5..."
 
-cp /home/pi/Way-Connect_Box/config/patches/patch_5/dnsmasq.conf /etc/
+cp /home/pi/Way-Connect_Box/patches/patch_5/dnsmasq.conf /etc/
