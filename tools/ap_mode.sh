@@ -3,14 +3,15 @@
 ROOTDIR="/home/pi"
 
 if [ -f ${ROOTDIR}/env ]; then
-  . ${ROOTDIR}/env
-  NEXT_MODE=$AP_MODE
 
   if [ ! -f ${ROOTDIR}/ap ]; then
     touch ${ROOTDIR}/ap
     echo "AP_MODE=\"$NEXT_MODE\"" >> ${ROOTDIR}/ap
+    echo "AP_MODE=\"$NEXT_MODE\"" >> ${ROOTDIR}/env
   fi
 
+  . ${ROOTDIR}/env
+  NEXT_MODE=$AP_MODE
   . ${ROOTDIR}/ap
   CURRENT_MODE=$AP_MODE
 
