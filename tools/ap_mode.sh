@@ -8,7 +8,7 @@ if [ -f ${ROOTDIR}/env ]; then
 
   if [ ! -f ${ROOTDIR}/ap ]; then
     touch ${ROOTDIR}/ap
-    echo "AP_MODE=\"$NEXT_MODE\"" > ${ROOTDIR}/ap
+    echo "AP_MODE=\"$NEXT_MODE\"" >> ${ROOTDIR}/ap
   fi
 
   . ${ROOTDIR}/ap
@@ -23,7 +23,7 @@ if [ -f ${ROOTDIR}/env ]; then
     ln -sf ${ROOTDIR}/config/network/interfaces.${NEXT_MODE} /etc/network/interfaces
     ln -sf ${ROOTDIR}/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/nodogsplash/nodogsplash.conf
 
-    sed -i "4s/.*/AP_MODE=\"${NEXT_MODE}\"/" ${ROOTDIR}/ap
+    sed -i "4s/.*/AP_MODE=\"${NEXT_MODE}\"/" ${ROOTDIR}/env
     sleep 1
     /sbin/shutdown -r now
   fi
