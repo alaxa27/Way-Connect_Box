@@ -6,8 +6,8 @@ if [ -f ${ROOTDIR}/env ]; then
 
   if [ ! -f ${ROOTDIR}/ap ]; then
     touch ${ROOTDIR}/ap
-    echo "AP_MODE=\"$NEXT_MODE\"" >> ${ROOTDIR}/ap
-    echo "AP_MODE=\"$NEXT_MODE\"" >> ${ROOTDIR}/env
+    echo "AP_MODE=\"wlan\"" >> ${ROOTDIR}/ap
+    echo "AP_MODE=\"wlan\"" >> ${ROOTDIR}/env
   fi
 
   . ${ROOTDIR}/env
