@@ -17,13 +17,13 @@ if [ -f ${ROOTDIR}/env ]; then
   if [ $CURRENT_MODE != $NEXT_MODE ]; then
     # Install the upgrade
 
-    ln -sf ${ROOTDIR}/config/iptables.${NEXT_MODE}.ipv4.nat /etc/iptables.ipv4.nat
-    ln -sf ${ROOTDIR}/config/dnsmasq.${NEXT_MODE}.conf /etc/dnsmasq.conf
-    ln -sf ${ROOTDIR}/config/rc.${NEXT_MODE}.local /etc/rc.local
-    ln -sf ${ROOTDIR}/config/network/interfaces.${NEXT_MODE} /etc/network/interfaces
-    ln -sf ${ROOTDIR}/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/nodogsplash/nodogsplash.conf
+    ln -sf ${ROOTDIR}/Way-Connect_Box/config/iptables.${NEXT_MODE}.ipv4.nat /etc/iptables.ipv4.nat
+    ln -sf ${ROOTDIR}/Way-Connect_Box/config/dnsmasq.${NEXT_MODE}.conf /etc/dnsmasq.conf
+    ln -sf ${ROOTDIR}/Way-Connect_Box/config/rc.${NEXT_MODE}.local /etc/rc.local
+    ln -sf ${ROOTDIR}/Way-Connect_Box/config/network/interfaces.${NEXT_MODE} /etc/network/interfaces
+    ln -sf ${ROOTDIR}/Way-Connect_Box/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/nodogsplash/nodogsplash.conf
 
-    sed -i "4s/.*/AP_MODE=\"${NEXT_MODE}\"/" ${ROOTDIR}/env
+    echo "AP_MODE=\"$NEXT_MODE\"" > ${ROOTDIR}/ap
     sleep 1
     /sbin/shutdown -r now
   fi
