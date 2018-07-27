@@ -21,6 +21,7 @@ ipset --restore < /etc/ipset.ipv4.nat
 iptables-restore < /etc/iptables.ipv4.nat
 
 /home/pi/Way-Connect_Box/tools/upgrade.sh
+/home/pi/Way-Connect_Box/tools/ap_mode.sh
 
 nodogsplash
 
