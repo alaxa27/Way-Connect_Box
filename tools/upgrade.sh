@@ -4,8 +4,8 @@ ROOTDIR="."
 
 if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
   if [ -f ${ROOTDIR}/way-box-update ]; then
-    curl -o "$ROOTDIR/way-box-update.remote" -H 'Authorization: token 6c82d5cef44e51902d37e36bf4093b81f8ea7da8' -H 'Accept: application/vnd.github.v3.raw' -O -L 'https://api.github.com/repos/alaxa27/Way-Connect_Box/contents/way-box-update?ref=master'
-    
+    curl -o "$ROOTDIR/way-box-update.remote" -H 'Accept: application/vnd.github.v3.raw' -O -L 'https://api.github.com/repos/alaxa27/Way-Connect_Box/contents/way-box-update?ref=master'
+
     . ${ROOTDIR}/way-box-update
     CURRENT_VERSION=$VERSION
     CURRENT_PATCH=$PATCH
