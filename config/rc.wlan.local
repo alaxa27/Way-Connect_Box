@@ -25,6 +25,6 @@ iptables-restore < /etc/iptables.ipv4.nat
 nodogsplash
 
 ESTABLISHMENT_NAME=$(curl http://localhost:5000/customers/establishment | jq -r '.name')
-sed -i "1s/.*/${ESTABLISHMENT_NAME:0:23}/" /etc/hostapd/hostapd.conf
+sed -i "2s/.*/${ESTABLISHMENT_NAME:0:23}/" /etc/hostapd/hostapd.conf
 hostapd -B /etc/hostapd/hostapd.conf
 exit 0
