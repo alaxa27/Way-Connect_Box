@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-ROOTDIR="/home/pi"
+ROOTDIR="."
 
 if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
   if [ -f ${ROOTDIR}/way-box-update ]; then
-    curl -o "$ROOTDIR/way-box-update.remote" -H 'Authorization: token 8696cc2f384a01e89c211023566becd6751a17e4' -H 'Accept: application/vnd.github.v3.raw' -O -L 'https://api.github.com/repos/alaxa27/Way-Connect_Box/contents/way-box-update?ref=master'
+    curl -o "$ROOTDIR/way-box-update.remote" -H 'Authorization: token 1968350e3e720558427c469cb0e9a98218797f8f' -H 'Accept: application/vnd.github.v3.raw' -O -L 'https://api.github.com/repos/alaxa27/Way-Connect_Box/contents/way-box-update?ref=master'
     . ${ROOTDIR}/way-box-update
     CURRENT_VERSION=$VERSION
     CURRENT_PATCH=$PATCH
