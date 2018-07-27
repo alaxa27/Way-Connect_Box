@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-ROOTDIR="."
+ROOTDIR="/home/pi"
 
 if mkdir "$ROOTDIR/update.lock" 2>/dev/null; then
   if [ -f ${ROOTDIR}/way-box-update ]; then
