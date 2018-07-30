@@ -18,4 +18,4 @@ ln -sf ${ROOTDIR}/Way-Connect_Box/config/iptables.${NEXT_MODE}.ipv4.nat /etc/ipt
 ln -sf ${ROOTDIR}/Way-Connect_Box/config/dnsmasq.${NEXT_MODE}.conf /etc/dnsmasq.conf
 ln -sf ${ROOTDIR}/Way-Connect_Box/config/rc.${NEXT_MODE}.local /etc/rc.local
 ln -sf ${ROOTDIR}/Way-Connect_Box/config/network/interfaces.${NEXT_MODE} /etc/network/interfaces
-ln -sf ${ROOTDIR}/Way-Connect_Box/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/network/nodogsplash
+ln -sf ${ROOTDIR}/Way-Connect_Box/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/network/nodogsplash.conf
