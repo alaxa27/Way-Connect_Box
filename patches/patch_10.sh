@@ -14,4 +14,4 @@ else
   echo "AP mode configured already."
 fi
 
-ln -sf ${ROOTDIR}/Way-Connect_Box/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/network/nodogsplash
+# ln -sf ${ROOTDIR}/Way-Connect_Box/config/nodogsplash/nodogsplash.${NEXT_MODE}.conf /etc/network/nodogsplash
