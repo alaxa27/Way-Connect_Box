@@ -23,6 +23,7 @@ while [ $count -lt 5 ]
 do
   ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." && break || echo "Internet connectivity test failed."
   sleep 5
+  count=count+1
 done
 
 ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
