@@ -17,6 +17,9 @@ if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
 
+# Checking Internet connectivity 
+ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
+
 ipset --restore < /etc/ipset.ipv4.nat
 iptables-restore < /etc/iptables.ipv4.nat
 
