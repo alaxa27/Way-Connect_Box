@@ -23,6 +23,7 @@ def sign(public_key, secret_key, data):
 @app.route('/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
 @app.route('/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
+    print(request.headers)
     print(path)
     if path == 'box':
         return API_KEY
