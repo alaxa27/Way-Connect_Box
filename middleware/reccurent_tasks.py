@@ -43,6 +43,8 @@ def get_current_config():
 def copy_default_config():
     subprocess.call('cp -R /home/pi/config/* /etc/')
     
+def reboot():
+    pass
 
 def write_config(config):
     for var in configFilesLocations:
