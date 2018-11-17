@@ -1,6 +1,6 @@
 API_HOST="api.way-connect.com"
 PORTAL_HOST="wayconnect-portal-user-journey.herokuapp.com"
-GIT_BRANCH="v2"
+GIT_BRANCH="devel"
 INTERFACE_IN="eth0"
 INTERFACE_OUT="wlan0"
 ESTABLISHMENT_NAME="Default"
