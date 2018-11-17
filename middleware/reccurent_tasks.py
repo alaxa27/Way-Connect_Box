@@ -99,4 +99,4 @@ if __name__=='__main__':
             write_config(remoteConfig)
         except MissingConfigOnServer:
             sys.exit(1)
-        reboot()
+        # reboot()
