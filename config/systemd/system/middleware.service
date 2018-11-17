@@ -6,6 +6,7 @@ After=network.target
 User=pi
 Group=www-data
 WorkingDirectory=/home/pi/Way-Connect_Box/middleware
+EnvironmentFile=/home/pi/keys
 EnvironmentFile=/home/pi/env
 ExecStart=/usr/local/bin/gunicorn --workers 2 --bind unix:/home/pi/Way-Connect_Box/middleware/middleware.sock wsgi:app
 
