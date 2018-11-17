@@ -46,6 +46,7 @@ def catch_all(path):
     headers['X-API-Sign'] = signature
 
     esreq = requests.Request(method=request.method, url=url, data=request.data, params=params, headers=headers)
+    print(url)
     resp = requests.Session().send(esreq.prepare())
 
     return (resp.text, resp.status_code, resp.headers.items())

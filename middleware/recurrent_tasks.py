@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-from dotenv.main import dotenv_values
+from dotenv import load_dotenv, main
 import fileinput
 import os
+from pathlib import Path
 import requests
 import subprocess
 
@@ -31,20 +32,20 @@ class MissingConfigOnServer(Exception):
 
 def replace_occurences(key, value, fileLocation):
     with fileinput.FileInput(fileLocation, inplace=True) as file:
-    for line in file:
-        print(line.replace(f'WC_{key}', value), end='')
+        for line in file:
+            print(line.replace(f'WC_{key}', value), end='')
 
 
 def get_current_config():
     path = '/home/pi/env'
-    return dotenv_values(path)
+    return main.dotenv_values(path)
 
     
 def copy_default_config():
     subprocess.call('cp -R /home/pi/config/* /etc/')
     
 def reboot():
-    pass
+    subprocess.call('reboot')
 
 def write_config(config):
     for var in configFilesLocations:
@@ -67,13 +68,14 @@ def post_box_status(state):
     boxStatus['internet_connection_message'] = 'Default message.'
     boxStatus['connected_customers'] = 0
 
-    requests.post(url='http://localhost:5000/boxes/status/', data=boxStatus)
+    res = requests.post(url='http://localhost:5000/boxes/status/', json=boxStatus)
 
 
 def get_box_config():
+    load_dotenv(dotenv_path=Path('..')/'keys')
     API_KEY = os.environ['API_KEY']
     API_SECRET = os.environ['API_SECRET']
-    apiHost = 'api.way-connect.com'
+    apiHost = 'wayconnect-staging.herokuapp.com'
 
     signature = sign(API_KEY, API_SECRET, {})
     headers = {}
@@ -84,7 +86,13 @@ def get_box_config():
     remoteConfig = requests.get(
         url=f'https://{apiHost}/boxes/config/', headers=headers
         )
-    return remoteConfig.json()
+    remoteHost = remoteConfig.json()['API_HOST']
+    establishmentInfo = requests.get(
+        url=f'https://{remoteHost}/customers/establishment/', headers=headers
+        )
+    response = remoteConfig.json()
+    response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
+    return response
 
 
 if __name__=='__main__':

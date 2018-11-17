@@ -4,7 +4,7 @@ media/
 samples/
 
 .env/
-venv/
+.venv/
 
 *.pyc
 *.sqlite3
