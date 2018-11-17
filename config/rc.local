@@ -33,6 +33,11 @@ iptables-restore < /etc/iptables.ipv4.nat
 
 nodogsplash
 
-sleep 5
-hostapd -B /etc/hostapd/hostapd.conf
+source /home/pi/env
+
+if [ $INTERFACE_OUT = "wlan0" ]; then
+  sleep 5
+  hostapd -B /etc/hostapd/hostapd.conf
+fi
+
 exit 0
