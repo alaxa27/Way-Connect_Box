@@ -19,11 +19,13 @@ systemctl enable middleware
 
 # Cronjob that checks for upgrades
 echo "0 5 * * * /home/pi/Way-Connect_Box/tools/upgrade.sh" >> cron
+echo "*/5 * * * * /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
 crontab cron
 rm cron
 cp way-box-update ../
 
 cp env ../
+cp keys ../
 
 git config --global user.email "a@a.a"
 git config --global user.name "a"
