@@ -1,9 +1,11 @@
 import os
-import hmac, hashlib, json
 from flask import Flask, request
 from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
+
+from sign import sign
+
 app = Flask(__name__)
 CORS(app)
 
@@ -11,14 +13,6 @@ API_HOST = os.environ['API_HOST']
 API_URL = 'https://' + API_HOST + '/'
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']
-
-def sign(public_key, secret_key, data):
-    h = hmac.new(
-        secret_key.encode('utf-8'), public_key.encode('utf-8'),
-        digestmod=hashlib.sha1
-    )
-    h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
-    return str(h.hexdigest())
 
 @app.route('/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
 @app.route('/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
