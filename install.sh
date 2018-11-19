@@ -31,6 +31,8 @@ ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
 systemctl enable middleware
+systemctl disable dhcpcd
+systemctl enable networking
 
 # Cronjob that checks for upgrades
 echo "*/5 * * * * /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron

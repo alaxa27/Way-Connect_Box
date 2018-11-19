@@ -10,13 +10,14 @@ from sign import sign
 
 configFilesLocations = {
     'INTERFACE_IN': [
-        '/etc/iptables.ipv4.nat'
+        '/etc/iptables.ipv4.nat',
+        '/etc/network/interfaces'
     ],
     'INTERFACE_OUT': [
         '/etc/nodogsplash/nodogsplash.conf',
         '/etc/dnsmasq.conf',
         '/etc/iptables.ipv4.nat',
-        '/etc/dhcpcd.conf'
+        '/etc/network/interfaces'
     ],
     'PORTAL_HOST': [
         '/etc/nodogsplash/htdocs/splash.html'
