@@ -70,7 +70,7 @@ def save_config(config):
     try:
         with open('/home/pi/env', 'w') as file:
             for key, value in config.items():
-                file.write(f'{key}={value}\n')
+                file.write(f'{key}="{value}"\n')
     except Exception as e:
         raise UnableToWriteConfig()
 
