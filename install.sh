@@ -21,7 +21,6 @@ systemctl enable middleware
 echo "*/5 * * * * /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
 crontab cron
 rm cron
-cp way-box-update ../
 
 cp env ../
 cp keys ../
