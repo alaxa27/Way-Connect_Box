@@ -16,7 +16,7 @@ configFilesLocations = {
         '/etc/nodogsplash/nodogsplash.conf',
         '/etc/dnsmasq.conf',
         '/etc/iptables.ipv4.nat',
-        'interfaces'
+        '/etc/dhcpcd.conf'
     ],
     'PORTAL_HOST': [
         '/etc/nodogsplash/htdocs/splash.html'
