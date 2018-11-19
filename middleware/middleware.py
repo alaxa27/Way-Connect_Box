@@ -14,8 +14,8 @@ API_URL = 'https://' + API_HOST + '/'
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']
 
-@app.route('/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
-@app.route('/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
+@app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
+@app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
     print(request.headers)
     print(path)

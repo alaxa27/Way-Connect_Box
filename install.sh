@@ -1,6 +1,6 @@
-apt-get update
-apt-get -y upgrade
-apt-get install -y hostapd ipset dnsmasq libmicrohttpd-dev python3 python3-dev python3-pip nginx-common nginx
+apt update
+apt -y upgrade
+apt install -y hostapd ipset dnsmasq libmicrohttpd-dev python3 python3-dev python3-pip nginx-common nginx
 
 cd nodogsplash/
 make && make install
@@ -13,12 +13,11 @@ cd ../
 cp -R config/* /etc/
 cp -R w.zone/ /var/www/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
-ln -s /etc/nginx/sites-available/wc.com.conf /etc/nginx/sites-enabled
+ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
 systemctl enable middleware
 
 # Cronjob that checks for upgrades
-echo "0 5 * * * /home/pi/Way-Connect_Box/tools/upgrade.sh" >> cron
 echo "*/5 * * * * /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
 crontab cron
 rm cron
