@@ -54,17 +54,17 @@ def get_current_config():
 
     
 def copy_default_config():
-    subprocess.call('cp -R /home/pi/Way-Connect_Box/config/* /etc/')
+    subprocess.call('cp -R /home/pi/Way-Connect_Box/config/* /etc/', shell=True)
     
 def reboot():
-    subprocess.call('reboot')
+    subprocess.call('reboot', shell=True)
 
 def write_config(config):
     for var in configFilesLocations:
         if var not in config:
             raise MissingConfigOnServer()
 
-    for varName, fileLocations in configFilesLocations:
+    for varName, fileLocations in configFilesLocations.items():
         for fileLocation in fileLocations:
             replace_occurences(varName, config[varName], fileLocation)
 
