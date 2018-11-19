@@ -64,7 +64,7 @@ def copy_default_config():
     
 
 def reboot():
-    subprocess.call('reboot', shell=True)
+    subprocess.call('/sbin/shutdown -r now', shell=True)
 
 
 def save_config(config):
@@ -115,7 +115,6 @@ def get_box_config():
     remoteConfig = requests.get(
         url=f'https://{apiHost}/boxes/config/', headers=headers
         )
-
     response = remoteConfig.json()
 
     remoteHost = response['API_HOST']
