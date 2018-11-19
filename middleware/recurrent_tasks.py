@@ -26,6 +26,11 @@ configFilesLocations = {
     ]
 }
 
+
+class UnableToWriteConfig(Exception):
+    pass
+
+
 class MissingConfigOnServer(Exception):
     pass
 
@@ -56,8 +61,19 @@ def get_current_config():
 def copy_default_config():
     subprocess.call('cp -R /home/pi/Way-Connect_Box/config/* /etc/', shell=True)
     
+
 def reboot():
     subprocess.call('reboot', shell=True)
+
+
+def save_config(config):
+    try:
+        with open('/home/pi/env', 'w') as file:
+            for key, value in config.items():
+                file.write(f'{key}={value}\n')
+    except Exception as e:
+        raise UnableToWriteConfig()
+
 
 def apply_config(config):
     for var in configFilesLocations:
@@ -122,5 +138,9 @@ if __name__=='__main__':
         try:
             apply_config(remoteConfig)
         except MissingConfigOnServer:
+            sys.exit(1)
+        try:
+            save_config(remoteConfig)
+        except UnableToWriteConfig:
             sys.exit(1)
         reboot()
