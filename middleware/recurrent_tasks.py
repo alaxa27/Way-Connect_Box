@@ -110,7 +110,7 @@ def get_box_config():
     load_dotenv(dotenv_path=keysPath / 'keys', override=True)
     API_KEY = os.environ['API_KEY']
     API_SECRET = os.environ['API_SECRET']
-    apiHost = 'wayconnect-staging.herokuapp.com'
+    apiHost = 'api.way-connect.com'
 
     signature = sign(API_KEY, API_SECRET, {})
     headers = {}

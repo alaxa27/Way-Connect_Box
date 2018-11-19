@@ -35,7 +35,7 @@ systemctl disable dhcpcd
 systemctl enable networking
 
 # Cronjob that checks for upgrades
-echo "*/5 * * * * /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
+echo "*/5 * * * * /usr/local/bin/python3.7 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
 crontab cron
 rm cron
 
@@ -45,4 +45,4 @@ cp keys ../
 git config --global user.email "a@a.a"
 git config --global user.name "a"
 
-
+/home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
