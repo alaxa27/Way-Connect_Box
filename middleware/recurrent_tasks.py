@@ -30,6 +30,18 @@ class MissingConfigOnServer(Exception):
     pass
 
 
+class MissingKeyInConfig(Exception):
+    pass
+
+
+def get_config_key(config, key):
+    try:
+        value = config[key]
+    except KeyError as key:
+        raise MissingKeyInConfig()
+
+    return value
+
 def replace_occurences(key, value, fileLocation):
     with fileinput.FileInput(fileLocation, inplace=True) as file:
         for line in file:
@@ -42,7 +54,7 @@ def get_current_config():
 
     
 def copy_default_config():
-    subprocess.call('cp -R /home/pi/config/* /etc/')
+    subprocess.call('cp -R /home/pi/Way-Connect_Box/config/* /etc/')
     
 def reboot():
     subprocess.call('reboot')
@@ -50,7 +62,6 @@ def reboot():
 def write_config(config):
     for var in configFilesLocations:
         if var not in config:
-            post_box_status(False)
             raise MissingConfigOnServer()
 
     for varName, fileLocations in configFilesLocations:
@@ -72,7 +83,7 @@ def post_box_status(state):
 
 
 def get_box_config():
-    load_dotenv(dotenv_path=Path('..')/'keys')
+    load_dotenv(dotenv_path=Path('/home/pi')/'keys')
     API_KEY = os.environ['API_KEY']
     API_SECRET = os.environ['API_SECRET']
     apiHost = 'wayconnect-staging.herokuapp.com'
