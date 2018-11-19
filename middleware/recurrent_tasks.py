@@ -83,7 +83,8 @@ def post_box_status(state):
 
 
 def get_box_config():
-    load_dotenv(dotenv_path=Path('/home/pi')/'keys')
+    keysPath = Path('/home/pi')
+    load_dotenv(dotenv_path=keysPath / 'keys', override=True)
     API_KEY = os.environ['API_KEY']
     API_SECRET = os.environ['API_SECRET']
     apiHost = 'wayconnect-staging.herokuapp.com'
@@ -97,11 +98,13 @@ def get_box_config():
     remoteConfig = requests.get(
         url=f'https://{apiHost}/boxes/config/', headers=headers
         )
-    remoteHost = remoteConfig.json()['API_HOST']
+
+    response = remoteConfig.json()
+
+    remoteHost = response['API_HOST']
     establishmentInfo = requests.get(
         url=f'https://{remoteHost}/customers/establishment/', headers=headers
         )
-    response = remoteConfig.json()
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
     return response
 

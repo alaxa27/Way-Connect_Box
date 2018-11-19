@@ -22,7 +22,7 @@ iptables-restore < /etc/iptables.ipv4.nat
 
 nodogsplash
 
-source /home/pi/env
+. /home/pi/env
 
 if [ $INTERFACE_OUT = "wlan0" ]; then
   sleep 5
