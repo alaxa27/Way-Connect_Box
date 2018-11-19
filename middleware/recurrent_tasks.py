@@ -59,7 +59,7 @@ def copy_default_config():
 def reboot():
     subprocess.call('reboot', shell=True)
 
-def write_config(config):
+def apply_config(config):
     for var in configFilesLocations:
         if var not in config:
             raise MissingConfigOnServer()
@@ -106,6 +106,8 @@ def get_box_config():
         url=f'https://{remoteHost}/customers/establishment/', headers=headers
         )
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
+    response['API_KEY'] = API_KEY
+    response['API_SECRET'] = API_SECRET
     return response
 
 
@@ -118,7 +120,7 @@ if __name__=='__main__':
     if remoteConfig != currentConfig:
         copy_default_config()
         try:
-            write_config(remoteConfig)
+            apply_config(remoteConfig)
         except MissingConfigOnServer:
             sys.exit(1)
         reboot()

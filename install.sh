@@ -11,7 +11,7 @@ tar xf Python-3.7.1.tar.xz
 cd Python-3.7.1
 ./configure
 make -j 4
-sudo make altinstall
+make altinstall
 cd ../
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3.7 get-pip.py
