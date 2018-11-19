@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.7
 from dotenv import load_dotenv, main
 import fileinput
 import os
