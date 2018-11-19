@@ -17,6 +17,7 @@ API_SECRET = os.environ['API_SECRET']
 @app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
 @app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
+    print('IP: ', request.remote_addr)
     print(request.headers)
     print(path)
     if path == 'box':
@@ -52,4 +53,4 @@ def catch_all(path):
     return (resp.text, resp.status_code, resp.headers.items())
 
 if __name__ == '__main__':
-    app.run()
+    app.run('0.0.0.0', port=5000)
