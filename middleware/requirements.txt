@@ -13,3 +13,4 @@ six==1.11.0
 urllib3==1.23
 Werkzeug==0.14.1
 python-dotenv==0.9.1
+gitpython=2.1.11
