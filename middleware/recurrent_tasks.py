@@ -1,10 +1,12 @@
 #!/usr/bin/env python3.7
 from dotenv import load_dotenv, main
 import fileinput
+import git
 import os
 from pathlib import Path
 import requests
 import subprocess
+import sys
 
 from sign import sign
 
@@ -46,6 +48,10 @@ class UpdateFetchingError(Exception):
     pass
 
 
+class HeadAlreadyExists(Exception):
+    pass
+
+
 class BranchDoesNotExist(Exception):
     pass
 
@@ -64,31 +70,37 @@ class PutVersionError(Exception):
 
 def check_branch_exist(repo, branch):
     try:
-        repo.create_head(branch, repo.remote.origin.refs['branch'])
-    except Exception:
-        raise BranchDoesNotExist('Failed to create the head.')
+        repo.create_head(branch, repo.remotes.origin.refs[branch])
+    except AttributeError as e:
+        raise BranchDoesNotExist(
+            f'Failed to create the head for {branch}; {str(e)}'
+            )
+    except Exception as e:
+        raise HeadAlreadyExists(f'Head already exists; {str(e)}')
+    return True
 
 def fetch_repo(repo):
     try:
         repo.remotes.origin.fetch()
-    except Exception:
-        raise UpdateFetchingError('Error while fetching github repo')
+    except Exception as e:
+        raise UpdateFetchingError(f'Error while fetching github repo; {e}')
 
 
 def get_last_commit(repo, branch):
-    return str(repo.commit(branch))
+    return str(repo.commit(f'origin/{branch}'))
 
 
 def apply_commit(repo, commit):
+    isSameCommit = str(repo.commit()) == commit
+    if (isSameCommit):
+        raise ApplySameCommitException(
+            f'Commit {commit} is already applied.'
+            )
+    print("commit", commit)
     try:
-        isSameCommit = str(repo.commit()) == commit
-        if (isSameCommit):
-            raise ApplySameCommitException(
-                f'Commit {commit} is already applied.'
-                )
-        repo.git.checkout(commit)
-    except Exception:
-        raise ApplyCommitError(f'Failed to apply commit : {commit}')
+        repo.git.reset(commit, '--hard')
+    except Exception as e:
+        raise ApplyCommitError(f'Failed to apply commit : {commit}; {str(e)}')
 
 
 def get_config_key(config, key):
@@ -198,6 +210,67 @@ def put_box_version(commitHash):
         raise PutVersionError('Error while putting the version to the backend.')
 
 
+def run_update(repoPath, config):
+    repo = git.Repo(repoPath)    
+                
+    print('Fetching repo...', end='')
+    try:
+        fetch_repo(repo)
+    except UpdateFetchingError as e:
+        post_box_status(True, update_running=False, update_message=str(e))
+        sys.exit(1)
+    print('OK')
+        
+    print('Retrieving branch ID from config...', end='')
+    try:
+        branch = get_config_key(config, 'GIT_BRANCH')
+    except MissingKeyInConfig as e:
+        post_box_status(True, update_running=False, update_message=str(e))
+        sys.exit(1)
+    print('OK')
+
+    print('Checking if branch exists...', end='')
+    try:
+        check_branch_exist(repo, branch)
+    except BranchDoesNotExist as e:
+        post_box_status(True, update_running=False, update_message=str(e))
+        sys.exit(1)
+    except HeadAlreadyExists:
+        pass
+    print('OK')
+
+    print('Retrieving commit ID from config...', end='')
+    try:
+        commit = get_config_key(config, 'GIT_COMMIT')
+        print('OK')
+    except MissingKeyInConfig:
+        print('FAIL')
+        print('Retrieving commit ID from last branch commit...', end='')
+        commit = get_last_commit(repo, branch)
+        print('OK')
+
+    print(f'Applying commit {commit}...', end='')
+    try:
+        apply_commit(repo, commit)
+    except ApplyCommitError as e:
+        print('FAIL')
+        print(f'Apply commit error: {e}')
+        post_box_status(True, update_running=False, update_message=str(e))
+        sys.exit(1)
+    except ApplySameCommitException:
+        print('FAIL')
+        print('Commit already applied.')
+        sys.exit(0)
+
+    print('Sending update confirmation to API...', end='')
+    try:
+        put_box_version(commit)
+    except PutVersionError as e:
+        post_box_status(True, update_running=False, update_message=str(e))
+        sys.exit(1)
+    print('OK')
+
+
 if __name__=='__main__':
     envPath = f'{homePath}/env'
     repoPath = f'{homePath}/Way-Connect_Box'
@@ -221,44 +294,9 @@ if __name__=='__main__':
         reboot()
         
 
-    repo = git.Repo(repoPath)    
-                
-    try:
-        git_fetch(repo)
-    except UpdateFetchingError as e:
-        post_box_status(True, update_running=False, update_message=e)
-        sys.exit(1)
-        
-    try:
-        branch = get_config_key('BRANCH', currentConfig)
-    except MissingKeyInConfig as e:
-        post_box_status(True, update_running=False, update_message=e)
-        sys.exit(1)
-
-    try:
-        check_branch_exist(branch, repo)
-    except BranchDoesNotExist as e:
-        post_box_status(True, update_running=False, update_message=e)
-        
-    try:
-        commit = get_config_key('COMMIT', currentConfig)
-    except MissingKeyInConfig:
-        commit = get_last_commit(branch, repo)
-
-    try:
-        apply_commit(commit, repo)
-    except ApplyCommitError as e:
-        post_box_status(False, update_running=False, update_message=e)
-        sys.exit(1)
-    except ApplySameCommitException:
-        sys.exit(0)
-
-    try:
-        put_box_version(commit)
-    except PutVersionError as e:
-        post_box_status(False, update_running=False, update_message=e)
-        sys.exit(1)
-    reboot()
+    run_update(repoPath, currentConfig)
+    post_box_status(True)
+    # reboot()
 
 
     
