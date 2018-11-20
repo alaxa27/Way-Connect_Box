@@ -8,7 +8,7 @@ import requests
 import subprocess
 import sys
 
-from sign import sign
+from utils import sign
 
 homePath = '/home/pi'
 
@@ -296,7 +296,7 @@ if __name__=='__main__':
 
     run_update(repoPath, currentConfig)
     post_box_status(True)
-    
+
     reboot()
 
 

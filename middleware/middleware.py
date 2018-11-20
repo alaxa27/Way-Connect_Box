@@ -4,11 +4,12 @@ from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
 
-from sign import sign
+from utils import sign, get_client_from_ip
 
 app = Flask(__name__)
 CORS(app)
 
+STAGE = os.environ['STAGE']
 API_HOST = os.environ['API_HOST']
 API_URL = 'https://' + API_HOST + '/'
 API_KEY = os.environ['API_KEY']
@@ -17,7 +18,20 @@ API_SECRET = os.environ['API_SECRET']
 @app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
 @app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
-    print('IP: ', request.remote_addr)
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    print(str(ip))
+    pathSplit = path.split('/')
+    if pathSplit[0] == 'customers':
+        if pathSplit[1] == 'mac':
+            mac = '11:11:11:11:11:11'
+            if STAGE == 'production':
+                client = get_client_from_ip(str(ip))
+                mac = client['mac']
+            path = path.replace('mac', mac)
+
     print(request.headers)
     print(path)
     if path == 'box':
