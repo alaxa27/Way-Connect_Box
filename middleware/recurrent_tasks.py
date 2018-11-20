@@ -296,7 +296,7 @@ if __name__=='__main__':
 
     run_update(repoPath, currentConfig)
     post_box_status(True)
-    # reboot()
+    reboot()
 
 
     
