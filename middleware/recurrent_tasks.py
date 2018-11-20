@@ -63,19 +63,32 @@ class PutVersionError(Exception):
 
 
 def check_branch_exist(repo, branch):
-    pass
-
+    try:
+        repo.create_head(branch, repo.remote.origin.refs['branch'])
+    except Exception:
+        raise BranchDoesNotExist('Failed to create the head.')
 
 def fetch_repo(repo):
-    pass
-    
+    try:
+        repo.remotes.origin.fetch()
+    except Exception:
+        raise UpdateFetchingError('Error while fetching github repo')
 
-def get_latest_commit(repo, branch):
-    pass
+
+def get_last_commit(repo, branch):
+    return str(repo.commit(branch))
 
 
-def apply_commit(repo, commitHash):
-    pass
+def apply_commit(repo, commit):
+    try:
+        isSameCommit = str(repo.commit()) == commit
+        if (isSameCommit):
+            raise ApplySameCommitException(
+                f'Commit {commit} is already applied.'
+                )
+        repo.git.checkout(commit)
+    except Exception:
+        raise ApplyCommitError(f'Failed to apply commit : {commit}')
 
 
 def get_config_key(config, key):
@@ -174,7 +187,7 @@ def get_box_config():
 
 def put_box_version(commitHash):
     boxVersion = {}
-    boxVersion['commit'] = commitHash
+    boxVersion['commit_hash'] = commitHash
     
     try:
         res = requests.put(
@@ -207,16 +220,8 @@ if __name__=='__main__':
             sys.exit(1)
         reboot()
         
-    try:
-        branch = get_config_key('BRANCH', currentConfig):  
-    except MissingKeyInConfig as e:
-        post_box_status(True, update_running=False, update_message=e)
-        sys.exit(1)
 
-    try:
-        check_branch_exist(branch, repo)
-    except BranchDoesNotExist as e:
-        post_box_status(True, update_running=False, update_message=e)
+    repo = git.Repo(repoPath)    
                 
     try:
         git_fetch(repo)
@@ -225,12 +230,23 @@ if __name__=='__main__':
         sys.exit(1)
         
     try:
-        commitHash = get_config_key('COMMIT', currentConfig)
-    except MissingKeyInConfig:
-        commitHash = get_latest_commit(branch, repo)
+        branch = get_config_key('BRANCH', currentConfig)
+    except MissingKeyInConfig as e:
+        post_box_status(True, update_running=False, update_message=e)
+        sys.exit(1)
 
     try:
-        apply_commit(commitHash, repo)
+        check_branch_exist(branch, repo)
+    except BranchDoesNotExist as e:
+        post_box_status(True, update_running=False, update_message=e)
+        
+    try:
+        commit = get_config_key('COMMIT', currentConfig)
+    except MissingKeyInConfig:
+        commit = get_last_commit(branch, repo)
+
+    try:
+        apply_commit(commit, repo)
     except ApplyCommitError as e:
         post_box_status(False, update_running=False, update_message=e)
         sys.exit(1)
@@ -238,7 +254,7 @@ if __name__=='__main__':
         sys.exit(0)
 
     try:
-        put_box_version(commitHash)
+        put_box_version(commit)
     except PutVersionError as e:
         post_box_status(False, update_running=False, update_message=e)
         sys.exit(1)
