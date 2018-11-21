@@ -88,7 +88,7 @@ def sign(public_key, secret_key, data):
 def post_box_status(
     state,
     internet_connection_active=True,
-    internet_connection_message='Default message.'
+    internet_connection_message='Default message.',
     update_running=True,
     update_message='Default message.',
     nodogsplash_running=True,
