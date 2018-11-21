@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
@@ -10,7 +10,7 @@ from utils import (
     get_ip_from_request,
     get_client_from_ip,
     authenticate_customer,
-    AuthenticationFailed
+    NdsctlExecutionFailed
 )
 
 app = Flask(__name__)
@@ -31,15 +31,19 @@ API_SECRET = os.environ['API_SECRET']
 def authenticate():
     ip = get_ip_from_request(request)
     try:
-        authenticate_customer(ip)
-    except AuthenticationFailed as e:
+        client = get_client_from_ip(str(ip))
+    except NdsctlExecutionFailed as e:
         post_box_status(
             True,
             nodogsplash_running=False,
             nodogsplash_message=str(e)
             )
         return (f'Error authenticating: {ip}', 400)
-    return (f'{ip} is now authenticated', 200)
+    res = jsonify(
+        url=f'http://w.zone:2050/nodogsplash_auth/?tok={client['token']}\
+            &redir="http://google.com"'
+        )
+    return (res, 200)
 
 
 @app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
