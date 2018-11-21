@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
-from urllib import quote
+from urllib.parse import urlencode
 
 from utils import (
     sign,
@@ -42,7 +42,7 @@ def authenticate():
         return (f'Error authenticating: {ip}', 400)
 
     url = f'http://w.zone:2050/nodogsplash_auth/?tok={client["token"]}&redir="http://google.com"'
-    res = jsonify(url=quote(url, safe=''))
+    res = jsonify(url=urlencode(url, safe=''))
     return (res, 200)
 
 
