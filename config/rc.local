@@ -17,22 +17,16 @@ if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
 
-# Checking Internet connectivity
-count=0
-while [ $count -lt 5 ]
-do
-  ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." && break || echo "Internet connectivity test failed."
-  sleep 5
-  count=count+1
-done
-
-ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
-
 ipset --restore < /etc/ipset.ipv4.nat
 iptables-restore < /etc/iptables.ipv4.nat
 
-/home/pi/Way-Connect_Box/tools/upgrade.sh
-/home/pi/Way-Connect_Box/tools/ap_mode.sh
-
 nodogsplash
+
+. /home/pi/env
+
+if [ $INTERFACE_OUT = "wlan0" ]; then
+  sleep 5
+  hostapd -B /etc/hostapd/hostapd.conf
+fi
+
 exit 0
