@@ -45,7 +45,7 @@ def authenticate():
         'tok': client['token'],
         'redir': 'http://google.com'
     }
-    url = f'http://w.zone:2050/nodogsplash_auth/?{urlencode(params)}'
+    url = f'http://192.168.220.2:2050/nodogsplash_auth/?{urlencode(params)}'
     res = jsonify(url=url)
     return (res, 200)
 
