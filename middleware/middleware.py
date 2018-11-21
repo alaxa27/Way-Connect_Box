@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
+from urllib import quote
 
 from utils import (
     sign,
@@ -39,7 +40,9 @@ def authenticate():
             nodogsplash_message=str(e)
             )
         return (f'Error authenticating: {ip}', 400)
-    res = jsonify(url=f'http://w.zone:2050/nodogsplash_auth/?tok={client["token"]}&redir="http://google.com"')
+
+    url = f'http://w.zone:2050/nodogsplash_auth/?tok={client["token"]}&redir="http://google.com"'
+    res = jsonify(url=urllib.quote(url, safe=''))
     return (res, 200)
 
 
