@@ -238,7 +238,7 @@ def run_update(repoPath, config):
     except ApplySameCommitException:
         print('FAIL')
         print('Commit already applied.')
-        sys.exit(0)
+        return False
 
     print('Sending update confirmation to API...', end='')
     try:
@@ -247,6 +247,7 @@ def run_update(repoPath, config):
         post_box_status(True, update_running=False, update_message=str(e))
         sys.exit(1)
     print('OK')
+    return True
 
 
 if __name__=='__main__':
@@ -258,7 +259,9 @@ if __name__=='__main__':
     currentConfig = get_current_config(envPath)
     remoteConfig = get_box_config()
 
-    if remoteConfig != currentConfig:
+    updateStatus = run_update(repoPath, remoteConfig)
+
+    if remoteConfig != currentConfig or updateStatus:
         copy_default_config(configDir, etcDir)
         try:
             apply_config(remoteConfig, configFilesLocations)
@@ -271,11 +274,4 @@ if __name__=='__main__':
             sys.exit(1)
         reboot()
         
-
-    run_update(repoPath, currentConfig)
     post_box_status(True)
-
-    reboot()
-
-
-    
