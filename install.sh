@@ -25,7 +25,7 @@ cd middleware/
 pip3 install -r requirements.txt
 cd ../
 
-cp eth/config.txxt /boot
+cp eth/config.txt /boot
 cp -R config/* /etc/
 cp -R w.zone/ /var/www/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
