@@ -1,5 +1,10 @@
 import hmac, hashlib, json
+import requests
 import subprocess
+
+
+class AuthenticationFailed(Exception):
+    pass
 
 
 class NdsctlExecutionFailed(Exception):
@@ -10,8 +15,10 @@ class KeyMissingInNdsctlOutput(Exception):
     pass
 
 
-def call_ndsctl():
-    output = subprocess.check_output(['sudo', '/usr/bin/ndsctl', 'json'])
+def call_ndsctl(params):
+    args = ['sudo', '/usr/bin/ndsctl']
+    args += params
+    output = subprocess.check_output(args)
         
     return json.loads(output)
 
@@ -31,7 +38,7 @@ def retrieve_client_list(output):
 
 def get_client_from_ip(ip):
     try: 
-        ndsctlOutput = call_ndsctl()
+        ndsctlOutput = call_ndsctl(['json'])
     except OSError as e:
         raise NdsctlExecutionFailed(str(e))        
     except subprocess.SubprocessError as e:
@@ -50,6 +57,23 @@ def get_client_from_ip(ip):
     result['mac'] = '22:22:22:22:22:22'
     result['token'] = 'token'
     return result
+
+
+def authenticate_customer(ip):
+    try: 
+        call_ndsctl(['auth', ip])
+    except OSError as e:
+        raise AuthenticationFailed(str(e))        
+    except subprocess.SubprocessError as e:
+        raise AuthenticationFailed(str(e))
+
+
+def get_ip_from_request(request):
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    return ip
     
 
 def sign(public_key, secret_key, data):
@@ -59,3 +83,30 @@ def sign(public_key, secret_key, data):
     )
     h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
     return str(h.hexdigest())
+
+
+def post_box_status(
+    state,
+    update_running=True,
+    update_message='Default message.',
+    nodogsplash_running=True,
+    nodogsplash_message='Default message.'
+    ):
+    serviceList = ['dhcpd', 'dnsmasq', 'hostapd', 'update']
+    boxStatus = {}
+    for service in serviceList:
+        boxStatus[f'{service}_running'] = True
+        boxStatus[f'{service}_message'] = 'Default message.'
+
+    boxStatus['internet_connection_active'] = state
+    boxStatus['internet_connection_message'] = 'Default message.'
+    boxStatus['nodogsplash_running'] = nodogsplash_running
+    boxStatus['nodogsplash_message'] = nodogsplash_message
+    boxStatus['update_running'] = update_running
+    boxStatus['update_message'] = update_message
+    boxStatus['connected_customers'] = 0
+
+    res = requests.post(
+        url='http://localhost:5000/portal/boxes/status/',
+        json=boxStatus
+        )

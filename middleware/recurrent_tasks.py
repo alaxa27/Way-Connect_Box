@@ -8,7 +8,7 @@ import requests
 import subprocess
 import sys
 
-from utils import sign
+from utils import sign, post_box_status
 
 homePath = '/home/pi'
 
@@ -145,28 +145,6 @@ def apply_config(config, configFiles):
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:
             replace_occurences(varName, config[varName], fileLocation)
-
-
-def post_box_status(
-    state,
-    update_running=True,
-    update_message='Default message.'
-    ):
-    serviceList = ['dhcpd', 'dnsmasq', 'hostapd', 'nodogsplash', 'update']
-    boxStatus = {}
-    for service in serviceList:
-        boxStatus[f'{service}_running'] = True
-        boxStatus[f'{service}_message'] = 'Default message.'
-    boxStatus['internet_connection_active'] = state
-    boxStatus['internet_connection_message'] = 'Default message.'
-    boxStatus['update_running'] = update_running
-    boxStatus['update_message'] = update_message
-    boxStatus['connected_customers'] = 0
-
-    res = requests.post(
-        url='http://localhost:5000/portal/boxes/status/',
-        json=boxStatus
-        )
 
 
 def get_box_config():

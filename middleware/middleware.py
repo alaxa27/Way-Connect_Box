@@ -4,24 +4,48 @@ from flask_cors import CORS
 from werkzeug.datastructures import ImmutableMultiDict
 import requests
 
-from utils import sign, get_client_from_ip
+from utils import (
+    sign,
+    post_box_status,
+    get_ip_from_request,
+    get_client_from_ip,
+    authenticate_customer,
+    AuthenticationFailed
+)
 
 app = Flask(__name__)
 CORS(app)
 
-STAGE = os.environ['STAGE']
+try:
+    STAGE = os.environ['STAGE']
+except KeyError:
+    STAGE = 'development'
+
 API_HOST = os.environ['API_HOST']
 API_URL = 'https://' + API_HOST + '/'
 API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']
 
+
+@app.route('/portal/customers/authenticate', methods=['GET'])
+def authenticate():
+    ip = get_ip_from_request(request)
+    try:
+        authenticate_customer(ip)
+    except AuthenticationFailed as e:
+        post_box_status(
+            True,
+            nodogsplash_running=False,
+            nodogsplash_message=str(e)
+            )
+        return (f'Error authenticating: {ip}', 400)
+    return (f'{ip} is now authenticated', 200)
+
+
 @app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
 @app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
-    if request.headers.getlist("X-Forwarded-For"):
-        ip = request.headers.getlist("X-Forwarded-For")[0]
-    else:
-        ip = request.remote_addr
+    ip = get_ip_from_request(request)
     print(str(ip))
     pathSplit = path.split('/')
     if pathSplit[0] == 'customers':
