@@ -40,7 +40,7 @@ def authenticate():
             )
         return (f'Error authenticating: {ip}', 400)
     res = jsonify(
-        url=f'http://w.zone:2050/nodogsplash_auth/?tok={client['token']}\
+        url=f'http://w.zone:2050/nodogsplash_auth/?tok={client["token"]}\
             &redir="http://google.com"'
         )
     return (res, 200)
