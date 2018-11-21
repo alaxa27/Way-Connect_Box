@@ -87,6 +87,8 @@ def sign(public_key, secret_key, data):
 
 def post_box_status(
     state,
+    internet_connection_active=True,
+    internet_connection_message='Default message.'
     update_running=True,
     update_message='Default message.',
     nodogsplash_running=True,
@@ -95,11 +97,11 @@ def post_box_status(
     serviceList = ['dhcpd', 'dnsmasq', 'hostapd', 'update']
     boxStatus = {}
     for service in serviceList:
-        boxStatus[f'{service}_running'] = True
+        boxStatus[f'{service}_running'] = state
         boxStatus[f'{service}_message'] = 'Default message.'
 
-    boxStatus['internet_connection_active'] = state
-    boxStatus['internet_connection_message'] = 'Default message.'
+    boxStatus['internet_connection_active'] = internet_connection_active
+    boxStatus['internet_connection_message'] = internet_connection_message
     boxStatus['nodogsplash_running'] = nodogsplash_running
     boxStatus['nodogsplash_message'] = nodogsplash_message
     boxStatus['update_running'] = update_running

@@ -32,6 +32,14 @@ configFilesLocations = {
 }
 
 
+class FetchConfigError(Exception):
+    pass
+
+
+class FetchEstablishmentError(Exception):
+    pass
+
+
 class UnableToWriteConfig(Exception):
     pass
 
@@ -160,15 +168,23 @@ def get_box_config():
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
 
-    remoteConfig = requests.get(
-        url=f'https://{apiHost}/boxes/config/', headers=headers
-        )
+    try:
+        remoteConfig = requests.get(
+            url=f'https://{apiHost}/boxes/config/', headers=headers
+            )
+    except Exception as e:
+        raise FetchConfigError(e)
+        
     response = remoteConfig.json()
 
     remoteHost = response['API_HOST']
-    establishmentInfo = requests.get(
-        url=f'https://{remoteHost}/customers/establishment/', headers=headers
-        )
+    try:
+        establishmentInfo = requests.get(
+            url=f'https://{remoteHost}/customers/establishment/', headers=headers
+            )
+    except Exception as e:
+        raise FetchEstablishmentError(e)
+        
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
     response['API_KEY'] = API_KEY
     response['API_SECRET'] = API_SECRET
@@ -257,7 +273,20 @@ if __name__=='__main__':
     etcDir = '/etc'
 
     currentConfig = get_current_config(envPath)
-    remoteConfig = get_box_config()
+    try:
+        remoteConfig = get_box_config()
+    except FetchConfigError as e:
+        post_box_status(
+            True,
+            internet_connection_active=False,
+            internet_connection_message=f'Error fetching config: {str(e)}'
+            )
+    except FetchEstablishmentError as e:
+        post_box_status(
+            True,
+            internet_connection_active=False,
+            internet_connection_message=f'Error fetching establishment: {str(e)}'
+            )
 
     updateStatus = run_update(repoPath, remoteConfig)
 
