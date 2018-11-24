@@ -101,6 +101,7 @@ def catch_all(path):
         headers=headers)
     print(url)
     resp = requests.Session().send(esreq.prepare())
+    resp.encoding = 'utf-8'
 
     return (resp.text, resp.status_code, resp.headers.items())
 
