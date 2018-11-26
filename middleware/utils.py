@@ -1,4 +1,6 @@
-import hmac, hashlib, json
+import hmac
+import hashlib
+import json
 import requests
 import subprocess
 
@@ -19,28 +21,28 @@ def call_ndsctl(params):
     args = ['sudo', '/usr/bin/ndsctl']
     args += params
     output = subprocess.check_output(args)
-        
+
     return json.loads(output)
 
 
 def retrieve_client_list(output):
     clients = output['clients']
-    clientList =  []
+    clientList = []
     for clientMac, clientInfo in clients.items():
         client = {}
         client['mac'] = clientMac
         client['ip'] = clientInfo['ip']
         client['token'] = clientInfo['token']
         clientList.append(client)
-        
+
     return clientList
 
 
 def get_client_from_ip(ip):
-    try: 
+    try:
         ndsctlOutput = call_ndsctl(['json'])
     except OSError as e:
-        raise NdsctlExecutionFailed(str(e))        
+        raise NdsctlExecutionFailed(str(e))
     except subprocess.SubprocessError as e:
         raise NdsctlExecutionFailed(str(e))
 
@@ -48,7 +50,7 @@ def get_client_from_ip(ip):
         clientList = retrieve_client_list(ndsctlOutput)
     except KeyError as e:
         raise KeyMissingInNdsctlOutput(str(e))
-        
+
     for client in clientList:
         if client['ip'] == ip:
             return client
@@ -60,10 +62,10 @@ def get_client_from_ip(ip):
 
 
 def authenticate_customer(ip):
-    try: 
+    try:
         call_ndsctl(['auth', ip])
     except OSError as e:
-        raise AuthenticationFailed(str(e))        
+        raise AuthenticationFailed(str(e))
     except subprocess.SubprocessError as e:
         raise AuthenticationFailed(str(e))
 
@@ -74,7 +76,7 @@ def get_ip_from_request(request):
     else:
         ip = request.remote_addr
     return ip
-    
+
 
 def sign(public_key, secret_key, data):
     h = hmac.new(
@@ -93,7 +95,7 @@ def post_box_status(
     update_message='Default message.',
     nodogsplash_running=True,
     nodogsplash_message='Default message.'
-    ):
+):
     serviceList = ['dhcpd', 'dnsmasq', 'hostapd', 'update']
     boxStatus = {}
     for service in serviceList:
@@ -108,7 +110,7 @@ def post_box_status(
     boxStatus['update_message'] = update_message
     boxStatus['connected_customers'] = 0
 
-    res = requests.post(
+    requests.post(
         url='http://localhost:5000/portal/boxes/status/',
         json=boxStatus
-        )
+    )

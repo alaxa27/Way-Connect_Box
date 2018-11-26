@@ -1,18 +1,16 @@
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from werkzeug.datastructures import ImmutableMultiDict
 import requests
 from urllib.parse import urlencode
-
 from utils import (
     sign,
     post_box_status,
     get_ip_from_request,
     get_client_from_ip,
-    authenticate_customer,
     NdsctlExecutionFailed
 )
+
 
 app = Flask(__name__)
 CORS(app)
@@ -50,7 +48,11 @@ def authenticate():
     return (res, 200)
 
 
-@app.route('/portal/', methods=['POST', 'GET', 'PATCH', 'PUT'], defaults={'path': ''})
+@app.route(
+    '/portal/',
+    methods=['POST', 'GET', 'PATCH', 'PUT'],
+    defaults={'path': ''}
+    )
 @app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
     ip = get_ip_from_request(request)
@@ -92,11 +94,17 @@ def catch_all(path):
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
 
-    esreq = requests.Request(method=request.method, url=url, data=request.data, params=params, headers=headers)
+    esreq = requests.Request(
+        method=request.method,
+        url=url, data=request.data,
+        params=params,
+        headers=headers)
     print(url)
     resp = requests.Session().send(esreq.prepare())
+    resp.encoding = 'utf-8'
 
     return (resp.text, resp.status_code, resp.headers.items())
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5000)

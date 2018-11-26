@@ -82,10 +82,11 @@ def check_branch_exist(repo, branch):
     except AttributeError as e:
         raise BranchDoesNotExist(
             f'Failed to create the head for {branch}; {str(e)}'
-            )
+        )
     except Exception as e:
         raise HeadAlreadyExists(f'Head already exists; {str(e)}')
     return True
+
 
 def fetch_repo(repo):
     try:
@@ -103,7 +104,7 @@ def apply_commit(repo, commit):
     if (isSameCommit):
         raise ApplySameCommitException(
             f'Commit {commit} is already applied.'
-            )
+        )
     print("commit", commit)
     try:
         repo.git.reset(commit, '--hard')
@@ -118,6 +119,7 @@ def get_config_key(config, key):
         raise MissingKeyInConfig(f'{key} key is missing in configuration.')
     return value
 
+
 def replace_occurences(key, value, fileLocation):
     with fileinput.FileInput(fileLocation, inplace=True) as file:
         for line in file:
@@ -127,10 +129,10 @@ def replace_occurences(key, value, fileLocation):
 def get_current_config(configPath):
     return main.dotenv_values(configPath)
 
-    
+
 def copy_default_config(fromDir, toDir):
     subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
-    
+
 
 def reboot():
     subprocess.call('/sbin/shutdown -r now', shell=True)
@@ -141,7 +143,7 @@ def save_config(config, configPath):
         with open(configPath, 'w') as file:
             for key, value in config.items():
                 file.write(f'{key}="{value}"\n')
-    except Exception as e:
+    except Exception:
         raise UnableToWriteConfig()
 
 
@@ -171,20 +173,21 @@ def get_box_config():
     try:
         remoteConfig = requests.get(
             url=f'https://{apiHost}/boxes/config/', headers=headers
-            )
+        )
     except Exception as e:
         raise FetchConfigError(e)
-        
+
     response = remoteConfig.json()
 
     remoteHost = response['API_HOST']
     try:
         establishmentInfo = requests.get(
-            url=f'https://{remoteHost}/customers/establishment/', headers=headers
-            )
+            url=f'https://{remoteHost}/customers/establishment/',
+            headers=headers
+        )
     except Exception as e:
         raise FetchEstablishmentError(e)
-        
+
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
     response['API_KEY'] = API_KEY
     response['API_SECRET'] = API_SECRET
@@ -194,19 +197,19 @@ def get_box_config():
 def put_box_version(commitHash):
     boxVersion = {}
     boxVersion['commit_hash'] = commitHash
-    
+
     try:
-        res = requests.put(
+        requests.put(
             url='http://localhost:5000/portal/boxes/version/',
             json=boxVersion
-            )
+        )
     except Exception:
         raise PutVersionError('Error while putting the version to the backend.')
 
 
-def run_update(repoPath, config):
-    repo = git.Repo(repoPath)    
-                
+def run_update(repoPath, config):  # noqa: C901
+    repo = git.Repo(repoPath)
+
     print('Fetching repo...', end='')
     try:
         fetch_repo(repo)
@@ -214,7 +217,7 @@ def run_update(repoPath, config):
         post_box_status(True, update_running=False, update_message=str(e))
         sys.exit(1)
     print('OK')
-        
+
     print('Retrieving branch ID from config...', end='')
     try:
         branch = get_config_key(config, 'GIT_BRANCH')
@@ -266,7 +269,7 @@ def run_update(repoPath, config):
     return True
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     envPath = f'{homePath}/env'
     repoPath = f'{homePath}/Way-Connect_Box'
     configDir = f'{repoPath}/config'
@@ -280,13 +283,13 @@ if __name__=='__main__':
             True,
             internet_connection_active=False,
             internet_connection_message=f'Error fetching config: {str(e)}'
-            )
+        )
     except FetchEstablishmentError as e:
         post_box_status(
             True,
             internet_connection_active=False,
-            internet_connection_message=f'Error fetching establishment: {str(e)}'
-            )
+            internet_connection_message=f'Error fetching establishment:{str(e)}'
+        )
 
     updateStatus = run_update(repoPath, remoteConfig)
 
@@ -302,5 +305,5 @@ if __name__=='__main__':
         except UnableToWriteConfig:
             sys.exit(1)
         reboot()
-        
+
     post_box_status(True)
