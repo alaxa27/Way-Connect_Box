@@ -322,22 +322,9 @@ if __name__ == '__main__':
             internet_connection_message=f'Error fetching establishment:{str(e)}'
         )
 
-    print('-------------Running update...')
+    print('--------------Running update--------------')
     updateStatus = run_update(repoPath, remoteConfig)
-    print('------------------------------')
-        
-    cronFile = f'{homePath}/cronjobs'
-    print('--------------Applying crontabs...')
-    try:
-        apply_crontab(remoteConfig, cronFile)
-    except UnableToApplyCrontab as e:
-        post_box_status(
-            False,
-            update_running=False,
-            update_message=f'Error applying crontab: {str(e)}'
-            )
-        sys.exit(1)
-    print('----------------------------------')
+    print('------------------------------------------')
 
     if remoteConfig != currentConfig or updateStatus:
         copy_default_config(configDir, etcDir)
@@ -353,5 +340,18 @@ if __name__ == '__main__':
             sys.exit(1)
 
         reboot()
+        
+    cronFile = f'{homePath}/cronjobs'
+    print('--------------Applying crontabs--------------')
+    try:
+        apply_crontab(remoteConfig, cronFile)
+    except UnableToApplyCrontab as e:
+        post_box_status(
+            False,
+            update_running=False,
+            update_message=f'Error applying crontab: {str(e)}'
+            )
+        sys.exit(1)
+    print('---------------------------------------------')
 
     post_box_status(True)
