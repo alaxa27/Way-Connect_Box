@@ -8,7 +8,7 @@ import requests
 import subprocess
 import sys
 
-from utils import sign, post_box_status
+from utils import sign, post_box_status, get_crons, write_crons, save_crons
 
 homePath = '/home/pi'
 
@@ -73,6 +73,10 @@ class ApplySameCommitException(Exception):
 
 
 class PutVersionError(Exception):
+    pass
+
+
+class UnableToApplyCrontab(Exception):
     pass
 
 
@@ -207,6 +211,32 @@ def put_box_version(commitHash):
         raise PutVersionError('Error while putting the version to the backend.')
 
 
+def apply_crontab(config, cronFile):
+    print('Retrieving crons from config...', end='')
+    try:
+        crons = get_crons(config)
+    except KeyError:
+        print('FAIL')
+        sys.exit(1)
+    print('OK')
+
+    print('Writing crons to cronjob file...', end='')
+    try:
+        write_crons(crons, cronFile)
+    except CronWritingError:
+        print('FAIL')
+        sys.exit(1)
+    print('OK')
+    
+    print('Saving new crons...', end='')
+    try:
+        save_crons(cronFile)
+    except CrontabExecutionFailed:
+        print('FAIL')
+        sys.exit(1)
+    print('OK')
+
+
 def run_update(repoPath, config):  # noqa: C901
     repo = git.Repo(repoPath)
 
@@ -299,6 +329,17 @@ if __name__ == '__main__':
             apply_config(remoteConfig, configFilesLocations)
         except MissingConfigOnServer:
             post_box_status(False)
+            sys.exit(1)
+
+        cronFile = f'{homePath}/cronjobs'
+        try:
+            apply_crontab(remoteConfig, cronFile)
+        except UnableToApplyCrontab as e:
+            post_box_status(
+                False,
+                update_running=False,
+                update_message=f'Error applying crontab: {str(e)}'
+                )
             sys.exit(1)
         try:
             save_config(remoteConfig, envPath)
