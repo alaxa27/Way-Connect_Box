@@ -115,7 +115,7 @@ def write_crons(crons, file):
 
 def save_crons(file):
     try:
-        subprocess.call(f'crontab {file}')
+        subprocess.call(f'/usr/bin/crontab {file}')
     except OSError as e:
         raise CrontabExecutionFailed(str(e))
     except subprocess.SubprocessError as e:
