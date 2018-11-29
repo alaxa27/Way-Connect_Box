@@ -218,7 +218,7 @@ def apply_crontab(config, cronFile):
         crons = get_crons(config)
     except KeyError:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
 
     print('Writing crons to cronjob file...', end='')
@@ -226,15 +226,15 @@ def apply_crontab(config, cronFile):
         write_crons(crons, cronFile)
     except utils.CronWritingError:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
     
     print('Saving new crons...', end='')
     try:
         save_crons(cronFile)
-    except utils.CrontabExecutionFailed:
+    except utils.CrontabExecutionFailed as e:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
 
 
@@ -322,7 +322,9 @@ if __name__ == '__main__':
             internet_connection_message=f'Error fetching establishment:{str(e)}'
         )
 
+    print('--------------Running update--------------')
     updateStatus = run_update(repoPath, remoteConfig)
+    print('------------------------------------------')
 
     if remoteConfig != currentConfig or updateStatus:
         copy_default_config(configDir, etcDir)
@@ -332,20 +334,24 @@ if __name__ == '__main__':
             post_box_status(False)
             sys.exit(1)
 
-        cronFile = f'{homePath}/cronjobs'
-        try:
-            apply_crontab(remoteConfig, cronFile)
-        except UnableToApplyCrontab as e:
-            post_box_status(
-                False,
-                update_running=False,
-                update_message=f'Error applying crontab: {str(e)}'
-                )
-            sys.exit(1)
         try:
             save_config(remoteConfig, envPath)
         except UnableToWriteConfig:
             sys.exit(1)
+
         reboot()
+        
+    cronFile = f'{homePath}/cronjobs'
+    print('--------------Applying crontabs--------------')
+    try:
+        apply_crontab(remoteConfig, cronFile)
+    except UnableToApplyCrontab as e:
+        post_box_status(
+            False,
+            update_running=False,
+            update_message=f'Error applying crontab: {str(e)}'
+            )
+        sys.exit(1)
+    print('---------------------------------------------')
 
     post_box_status(True)
