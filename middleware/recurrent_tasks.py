@@ -218,7 +218,7 @@ def apply_crontab(config, cronFile):
         crons = get_crons(config)
     except KeyError:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
 
     print('Writing crons to cronjob file...', end='')
@@ -226,15 +226,15 @@ def apply_crontab(config, cronFile):
         write_crons(crons, cronFile)
     except utils.CronWritingError:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
     
     print('Saving new crons...', end='')
     try:
         save_crons(cronFile)
-    except utils.CrontabExecutionFailed:
+    except utils.CrontabExecutionFailed as e:
         print('FAIL')
-        sys.exit(1)
+        raise UnableToApplyCrontab(str(e))
     print('OK')
 
 

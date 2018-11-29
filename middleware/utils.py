@@ -18,7 +18,7 @@ class KeyMissingInNdsctlOutput(Exception):
     pass
 
 
-class CrontabExecutionFailed(Exception)::
+class CrontabExecutionFailed(Exception):
     pass
 
 
