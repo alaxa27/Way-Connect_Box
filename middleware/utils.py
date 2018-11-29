@@ -21,6 +21,7 @@ class KeyMissingInNdsctlOutput(Exception):
 class CrontabExecutionFailed(Exception)::
     pass
 
+
 class CronWritingError(Exception):
     pass
 

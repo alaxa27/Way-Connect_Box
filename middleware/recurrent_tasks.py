@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 from utils import sign, post_box_status, get_crons, write_crons, save_crons
+import utils
 
 homePath = '/home/pi'
 
@@ -223,7 +224,7 @@ def apply_crontab(config, cronFile):
     print('Writing crons to cronjob file...', end='')
     try:
         write_crons(crons, cronFile)
-    except CronWritingError:
+    except utils.CronWritingError:
         print('FAIL')
         sys.exit(1)
     print('OK')
@@ -231,7 +232,7 @@ def apply_crontab(config, cronFile):
     print('Saving new crons...', end='')
     try:
         save_crons(cronFile)
-    except CrontabExecutionFailed:
+    except utils.CrontabExecutionFailed:
         print('FAIL')
         sys.exit(1)
     print('OK')
