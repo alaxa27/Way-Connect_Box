@@ -286,7 +286,7 @@ def run_update(repoPath, config):  # noqa: C901
         post_box_status(True, update_running=False, update_message=str(e))
         sys.exit(1)
     except ApplySameCommitException:
-        print('FAIL')
+        print('PASS')
         print('Commit already applied.')
         return False
 
@@ -342,7 +342,7 @@ if __name__ == '__main__':
         reboot()
         
     cronFile = f'{homePath}/cronjobs'
-    print('--------------Applying crontabs--------------')
+    print('------------Applying crontabs------------')
     try:
         apply_crontab(remoteConfig, cronFile)
     except UnableToApplyCrontab as e:
@@ -352,6 +352,6 @@ if __name__ == '__main__':
             update_message=f'Error applying crontab: {str(e)}'
             )
         sys.exit(1)
-    print('---------------------------------------------')
+    print('-----------------------------------------')
 
     post_box_status(True)
