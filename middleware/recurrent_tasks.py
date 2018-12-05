@@ -187,7 +187,7 @@ def get_box_config():
 
     try:
         establishmentInfo = requests.get(
-            url=f'http://localhost:5000/customers/establishment/',
+            url=f'http://localhost:5000/portal/customers/establishment/',
             headers=headers
         )
     except Exception as e:
