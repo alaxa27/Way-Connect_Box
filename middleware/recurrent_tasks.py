@@ -184,10 +184,9 @@ def get_box_config():
 
     response = remoteConfig.json()
 
-    remoteHost = response['API_HOST']
     try:
         establishmentInfo = requests.get(
-            url=f'https://{remoteHost}/customers/establishment/',
+            url=f'http://localhost:5000/customers/establishment/',
             headers=headers
         )
     except Exception as e:
@@ -216,7 +215,7 @@ def apply_crontab(config, cronFile):
     print('Retrieving crons from config...', end='')
     try:
         crons = get_crons(config)
-    except KeyError:
+    except KeyError as e:
         print('FAIL')
         raise UnableToApplyCrontab(str(e))
     print('OK')
@@ -224,7 +223,7 @@ def apply_crontab(config, cronFile):
     print('Writing crons to cronjob file...', end='')
     try:
         write_crons(crons, cronFile)
-    except utils.CronWritingError:
+    except utils.CronWritingError as e:
         print('FAIL')
         raise UnableToApplyCrontab(str(e))
     print('OK')
