@@ -33,7 +33,6 @@ def test_write_crons():
     assert(response == expectedResponse)
 
 
-
 if __name__ == '__main__':
     SUCCESS_COLOR = '\033[92m'
     ERROR_COLOR = '\033[91m'

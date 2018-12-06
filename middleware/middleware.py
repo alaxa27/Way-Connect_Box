@@ -92,6 +92,7 @@ def catch_all(path):
         if STAGE == 'production':
             client = get_client_from_ip(str(ip))
             mac = client['mac']
+            
     headers['X-Customer-Mac'] = mac
         
     esreq = requests.Request(
