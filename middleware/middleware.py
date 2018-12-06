@@ -86,13 +86,13 @@ def catch_all(path):
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
     try:
-        headers['X-Customer-Mac']
+        mac = headers['X-Customer-Mac']
     except KeyError:
         mac = '11:11:11:11:11:11'
         if STAGE == 'production':
             client = get_client_from_ip(str(ip))
             mac = client['mac']
-        headers['X-Customer-Mac'] = mac
+    headers['X-Customer-Mac'] = mac
         
     esreq = requests.Request(
         method=request.method,
