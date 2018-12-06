@@ -185,9 +185,10 @@ def get_box_config():
 
     response = remoteConfig.json()
 
+    remoteHost = response['API_HOST']
     try:
         establishmentInfo = requests.get(
-            url=f'http://localhost:5000/portal/customers/establishment/',
+            url=f'http://{remoteHost}/customers/establishment/',
             headers=headers
         )
     except Exception as e:
