@@ -29,6 +29,9 @@ configFilesLocations = {
     ],
     'ESTABLISHMENT_NAME': [
         '/etc/hostapd/hostapd.conf'
+    ],
+    'NDS_CLIENT_FORCE_TIMEOUT': [
+        '/etc/nodogsplash/nodogsplash.conf'
     ]
 }
 
