@@ -177,7 +177,6 @@ def get_box_config():
     headers['Host'] = apiHost
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
-    headers['X-Customer-Mac'] = '11:11:11:11:11:11'
 
     try:
         remoteConfig = requests.get(
