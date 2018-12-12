@@ -22,7 +22,7 @@ make && make install
 cd ../
 
 cd middleware/
-pip3 install -r requirements.txt
+pip3.7 install -r requirements.txt
 cd ../
 
 cp eth/config.txt /boot
