@@ -1,7 +1,7 @@
 STAGE="production"
 API_HOST="wayconnect-staging.herokuapp.com"
 PORTAL_HOST="portal.way-connect.com"
-GIT_BRANCH="devel"
+GIT_BRANCH="master"
 INTERFACE_IN="eth0"
 INTERFACE_OUT="wlan0"
 ESTABLISHMENT_NAME="Default"
