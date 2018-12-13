@@ -30,7 +30,6 @@ cp -R w.zone/ /var/www/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
-systemctl enable middleware
 systemctl disable dhcpcd
 systemctl enable networking
 
@@ -46,4 +45,7 @@ git config --global user.email "a@a.a"
 git config --global user.name "a"
 
 cp -R config/* /etc/
+systemctl daemon-reload
+systemctl enable middleware
+systemctl start middleware
 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
