@@ -26,7 +26,6 @@ pip3.7 install -r requirements.txt
 cd ../
 
 cp eth/config.txt /boot
-cp -R config/* /etc/
 cp -R w.zone/ /var/www/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
@@ -36,7 +35,7 @@ systemctl disable dhcpcd
 systemctl enable networking
 
 # Cronjob that checks for upgrades
-echo "*/5 * * * * /usr/local/bin/python3.7 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
+echo "*/1 * * * * /usr/local/bin/python3.7 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py" >> cron
 crontab cron
 rm cron
 
@@ -46,4 +45,5 @@ cp keys ../
 git config --global user.email "a@a.a"
 git config --global user.name "a"
 
+cp -R config/* /etc/
 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
