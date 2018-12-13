@@ -13,7 +13,7 @@ cd Python-3.7.1
 make -j 4
 make altinstall
 cd ../
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+wget https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 python3.7 get-pip.py
 cd Way-Connect_Box
 
