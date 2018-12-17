@@ -14,6 +14,6 @@ auto WC_INTERFACE_OUT
 iface WC_INTERFACE_OUT inet static
     address 192.168.220.2
     netmask 255.255.255.0
-    gateway 192.168.220.1
+#   gateway 192.168.220.1
 
 source-directory /etc/network/interfaces.d

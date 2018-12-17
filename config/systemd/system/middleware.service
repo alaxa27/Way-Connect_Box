@@ -3,7 +3,7 @@ Description=Unicorn Daemon for middleware
 After=network.target
 
 [Service]
-User=pi
+User=root
 Group=www-data
 WorkingDirectory=/home/pi/Way-Connect_Box/middleware
 EnvironmentFile=/home/pi/env
