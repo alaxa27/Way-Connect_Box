@@ -25,7 +25,8 @@ cd middleware/
 pip3.7 install -r requirements.txt
 cd ../
 
-cp eth/config.txt /boot
+# This is done at SD card writing
+#cp eth/config.txt /boot
 cp -R w.zone/ /var/www/
 ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
 ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
