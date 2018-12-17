@@ -1,5 +1,8 @@
+#!/bin/bash
+
 apt update
 apt -y upgrade
+apt install -y git
 apt install -y hostapd ipset dnsmasq libmicrohttpd-dev nginx-common nginx
 apt install -y  build-essential tk-dev libncurses5-dev libncursesw5-dev\
     libreadline6-dev libdb5.3-dev libgdbm-dev libsqlite3-dev libssl-dev\
@@ -15,6 +18,9 @@ make altinstall
 cd ../
 wget https://bootstrap.pypa.io/get-pip.py -O get-pip.py
 python3.7 get-pip.py
+
+
+git clone https://github.com/alaxa27/Way-Connect_Box.git
 cd Way-Connect_Box
 
 cd nodogsplash/
