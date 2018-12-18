@@ -4,10 +4,11 @@ from flask_cors import CORS
 import requests
 from urllib.parse import urlencode
 from utils import (
-    sign,
-    post_box_status,
     get_ip_from_request,
     get_client_from_ip,
+    replace_host,
+    sign,
+    post_box_status,
     NdsctlExecutionFailed
 )
 
@@ -104,7 +105,8 @@ def catch_all(path):
     resp = requests.Session().send(esreq.prepare())
     resp.encoding = 'utf-8'
 
-    return (resp.text, resp.status_code, resp.headers.items())
+    resp_text = replace_host(resp.text, 'storage.googleapis.com', 'w.zone:5001')
+    return (resp_text, resp.status_code, resp.headers.items())
 
 
 if __name__ == '__main__':

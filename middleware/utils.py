@@ -163,4 +163,39 @@ def is_connected(hostname):
     except Exception:
         pass
     return False
-    
+
+
+def dict_deep_replace(dict, occurrence, replacement):
+    for k, v in dict.items():
+        dict[k] = deep_replace(v, occurrence, replacement)
+
+    return dict 
+
+
+def list_deep_replace(list, occurrence, replacement):
+    for iteratee, item in enumerate(list):
+        list[iteratee] = deep_replace(item, occurrence, replacement)
+
+    return list
+
+
+def str_deep_replace(str, occurrence, replacement):
+    return str.replace(occurrence, replacement)
+
+
+def deep_replace(object, occurrence, replacement):
+    if type(object) is dict:
+        return dict_deep_replace(object, occurrence, replacement)
+    elif type(object) is list:
+        return list_deep_replace(object, occurrence, replacement)
+    elif type(object) is str:
+        return str_deep_replace(object, occurrence, replacement)
+    else:
+        return object
+
+
+def replace_host(textObject, original, replacement):
+    response_dict = json.loads(textObject)
+    response_dict = deep_replace(response_dict, original, replacement)
+    response_dict = deep_replace(response_dict, f'https://{replacement}', f'http://{replacement}')
+    return json.dumps(response_dict)
