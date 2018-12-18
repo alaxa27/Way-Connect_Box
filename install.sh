@@ -33,8 +33,6 @@ cd ../
 # This is done at SD card writing
 #cp eth/config.txt /boot
 cp -R w.zone/ /var/www/
-ln -s /etc/nginx/sites-available/middleware.conf /etc/nginx/sites-enabled
-ln -s /etc/nginx/sites-available/w.zone.conf /etc/nginx/sites-enabled
 systemctl daemon-reload
 systemctl disable dhcpcd
 systemctl enable networking
