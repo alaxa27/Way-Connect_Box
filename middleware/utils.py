@@ -195,7 +195,10 @@ def deep_replace(object, occurrence, replacement):
 
 
 def replace_host(textObject, original, replacement):
-    response_dict = json.loads(textObject)
+    try:
+        response_dict = json.loads(textObject)
+    except json.decoder.JSONDecodeError:
+        return textObject
     response_dict = deep_replace(response_dict, original, replacement)
     response_dict = deep_replace(response_dict, f'https://{replacement}', f'http://{replacement}')
     return json.dumps(response_dict)

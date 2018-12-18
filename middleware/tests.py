@@ -96,6 +96,12 @@ def test_deep_replace_str(mock):
     assert(mock.called)
 
 
+def test_replace_host():
+    """should return an empty string if the given textObject is an empty string"""
+    result = utils.replace_host('', 'A', 'B')
+    assert(result == '')
+
+
 if __name__ == '__main__':
     SUCCESS_COLOR = '\033[92m'
     ERROR_COLOR = '\033[91m'
