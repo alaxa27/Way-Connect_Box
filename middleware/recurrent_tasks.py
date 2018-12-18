@@ -25,7 +25,8 @@ configFilesLocations = {
         '/etc/network/interfaces'
     ],
     'PORTAL_HOST': [
-        '/etc/nodogsplash/htdocs/splash.html'
+        '/etc/nginx/sites-enabled/storage_reverse_proxy.conf',
+        '/etc/nginx/sites-enabled/portal_reverse_proxy.conf'
     ],
     'ESTABLISHMENT_NAME': [
         '/etc/hostapd/hostapd.conf'
