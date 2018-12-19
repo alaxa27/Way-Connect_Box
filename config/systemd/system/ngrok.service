@@ -9,7 +9,7 @@ Restart=always
 RestartSec=1min
 StandardOutput=null
 StandardError=null
-ExecStart=/home/pi/Way-Connect_Box/ngrok -config=/etc/ngrok.yml start ssh
+ExecStart=/home/pi/Way-Connect_Box/ngrok -config=/etc/ngrok.yml start-all
 ExecStop=/usr/bin/killall ngrok
 
 [Install]
