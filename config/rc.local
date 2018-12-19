@@ -31,11 +31,11 @@ fi
 #   ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
 #fi
 
-. /home/pi/env
-
-if [ $INTERFACE_OUT = "wlan0" ]; then
-  sleep 5
-  hostapd -B /etc/hostapd/hostapd.conf
-fi
+#. /home/pi/env
+#
+#if [ $INTERFACE_OUT = "wlan0" ]; then
+#  sleep 5
+#  hostapd -B /etc/hostapd/hostapd.conf
+#fi
 
 exit 0
