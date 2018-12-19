@@ -18,18 +18,18 @@ if [ "$_IP" ]; then
 fi
 
 # Checking Internet connectivity
-count=0
-while [ $count -lt 5 ]
-do
-  ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." && break || echo "Internet connectivity test failed."
-  sleep 5
-  count=count+1
-done
-
-if [ $count -gt 3 ]
-then
-   ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
-fi
+#count=0
+#while [ $count -lt 5 ]
+#do
+#  ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." && break || echo "Internet connectivity test failed."
+#  sleep 5
+#  count=count+1
+#done
+#
+#if [ $count -gt 3 ]
+#then
+#   ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
+#fi
 
 . /home/pi/env
 
