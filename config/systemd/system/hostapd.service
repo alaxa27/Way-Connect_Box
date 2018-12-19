@@ -5,11 +5,9 @@ After=network.target
 
 [Service]
 EnvironmentFile=/home/pi/env
-ExecStartPre=/bin/sh -c 'if [ $INTERFACE_OUT != "eth1" ]; then exit -1; fi'
+ExecStartPre=/bin/sh -c 'if [ $INTERFACE_OUT != "wlan0" ]; then exit -1; fi'
 ExecStart=/usr/sbin/hostapd -B /etc/hostapd/hostapd.conf
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
-
-stapd
