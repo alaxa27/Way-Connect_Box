@@ -1,0 +1,16 @@
+[Unit]
+Description=Tunneling service for WayBox
+After=syslog.target network.target
+
+[Service]
+Type=simple
+PrivateTmp=true
+Restart=always
+RestartSec=1min
+StandardOutput=null
+StandardError=null
+ExecStart=/home/pi/Way-Connect_Box/ngrok -config=/etc/ngrok.yml start ssh
+ExecStop=/usr/bin/killall ngrok
+
+[Install]
+WantedBy=multi-user.target

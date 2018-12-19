@@ -1,0 +1,12 @@
+server_addr: tunnel.way-connect.com:4443
+trust_host_root_certs: false
+tunnels:
+  ssh:
+    #remote_port: 59999 
+    proto:
+      tcp: 22
+  api:
+    subdomain: WC_NGROK_SUBDOMAIN
+    proto:
+      http: 4040
+      #addr: 4040

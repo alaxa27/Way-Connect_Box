@@ -33,6 +33,9 @@ configFilesLocations = {
     ],
     'NDS_CLIENT_FORCE_TIMEOUT': [
         '/etc/nodogsplash/nodogsplash.conf'
+    ],
+    'NGROK_REMOTE_PORT': [
+        '/etc/ngrok.yml'
     ]
 }
 
@@ -200,6 +203,7 @@ def get_box_config():
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']
     response['API_KEY'] = API_KEY
     response['API_SECRET'] = API_SECRET
+    response['NGROK_SUBDOMAIN'] = API_KEY[:8]
     return response
 
 

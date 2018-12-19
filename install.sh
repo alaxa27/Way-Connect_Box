@@ -51,5 +51,6 @@ git config --global user.name "a"
 cp -R config/* /etc/
 systemctl daemon-reload
 systemctl enable middleware
+systemctl enable ngrok
 systemctl start middleware
 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
