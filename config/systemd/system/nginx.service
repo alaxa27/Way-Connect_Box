@@ -14,9 +14,12 @@
 Description=A high performance web server and a reverse proxy server
 Documentation=man:nginx(8)
 After=network.target
+StartLimitIntervalSec=0
 
 [Service]
 Type=forking
+Restart=always
+RestartSec=1
 PIDFile=/run/nginx.pid
 ExecStartPre=/usr/sbin/nginx -t -q -g 'daemon on; master_process on;'
 ExecStart=/usr/sbin/nginx -g 'daemon on; master_process on;'
