@@ -1,13 +1,13 @@
 [Unit]
 Description=NoDogSplash Captive Portal
-After=network.target nginx.service
+After=nginx.service
 StartLimitIntervalSec=0
 
 [Service]
-Type=simple
-Restart=always
-RestartSec=1
+Type=forking
+ExecStartPre=/bin/systemctl is-active nginx
 ExecStart=/usr/bin/nodogsplash -d 5 $OPTIONS
+RestartSec=1
 Restart=on-failure
 
 [Install]
