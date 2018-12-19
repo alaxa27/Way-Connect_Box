@@ -7,7 +7,7 @@
 auto lo
 iface lo inet loopback
 
-auto WC_INTERFACE_IN
+allow-hotplug WC_INTERFACE_IN
 iface WC_INTERFACE_IN inet dhcp
 
 auto WC_INTERFACE_OUT
