@@ -34,8 +34,6 @@ fi
 ipset --restore < /etc/ipset.ipv4.nat
 iptables-restore < /etc/iptables.ipv4.nat
 
-nodogsplash
-
 . /home/pi/env
 
 if [ $INTERFACE_OUT = "wlan0" ]; then
