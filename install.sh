@@ -50,8 +50,6 @@ git config --global user.name "a"
 
 cp -R config/* /etc/
 systemctl daemon-reload
-systemctl enable middleware
-systemctl enable ngrok
-systemctl enable nodogsplash
-systemctl start middleware
+systemctl enable hostapd middleware nginx ngrok nodogsplash
+systemctl start nginx middleware
 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
