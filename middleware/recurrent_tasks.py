@@ -34,7 +34,7 @@ configFilesLocations = {
     'NDS_CLIENT_FORCE_TIMEOUT': [
         '/etc/nodogsplash/nodogsplash.conf'
     ],
-    'NGROK_REMOTE_PORT': [
+    'NGROK_SUBDOMAIN': [
         '/etc/ngrok.yml'
     ]
 }
