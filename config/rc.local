@@ -31,9 +31,6 @@ then
    ping -q -w 1 -c 1 google.com > /dev/null && echo "Internet connectivity test passed." || reboot
 fi
 
-ipset --restore < /etc/ipset.ipv4.nat
-iptables-restore < /etc/iptables.ipv4.nat
-
 . /home/pi/env
 
 if [ $INTERFACE_OUT = "wlan0" ]; then

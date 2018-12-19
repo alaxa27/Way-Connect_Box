@@ -12,6 +12,8 @@ iface WC_INTERFACE_IN inet dhcp
 
 auto WC_INTERFACE_OUT
 iface WC_INTERFACE_OUT inet static
+    pre-up ipset restore -! < /etc/ipset.ipv4.nat
+    pre-up iptables-restore < /etc/iptables.ipv4.nat
     address 192.168.220.2
     netmask 255.255.255.0
 #   gateway 192.168.220.1
