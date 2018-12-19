@@ -1,6 +1,6 @@
 [Unit]
 Description=NoDogSplash Captive Portal
-After=network.target
+After=network.target nginx.service
 
 [Service]
 Type=forking
