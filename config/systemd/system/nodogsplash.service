@@ -1,9 +1,12 @@
 [Unit]
 Description=NoDogSplash Captive Portal
 After=network.target nginx.service
+StartLimitIntervalSec=0
 
 [Service]
-Type=forking
+Type=simple
+Restart=always
+RestartSec=1
 ExecStart=/usr/bin/nodogsplash -d 5 $OPTIONS
 Restart=on-failure
 
