@@ -202,7 +202,7 @@ def write_config(config, configFiles, folder):
                 replace_occurences(
                     varName,
                     config[varName],
-                    f'${folder}{fileLocation}'
+                    f'${folder}${fileLocation}'
                     )
             except Exception:
                 raise WriteConfigError()
