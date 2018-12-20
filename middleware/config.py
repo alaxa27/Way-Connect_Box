@@ -191,7 +191,7 @@ def save_config(config, configPath):
         raise WriteConfigError()
 
 
-def write_config(config, configFiles, folder):
+def write_config(config, configFiles, configDir):
     for var in configFiles:
         if var not in config:
             raise MissingConfigOnServer()
@@ -202,7 +202,7 @@ def write_config(config, configFiles, folder):
                 replace_occurences(
                     varName,
                     config[varName],
-                    f'${folder}${fileLocation}'
+                    configDir+fileLocation
                     )
             except Exception:
                 raise WriteConfigError()
