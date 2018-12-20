@@ -6,80 +6,8 @@ import socket
 import subprocess
 
 
-class AuthenticationFailed(Exception):
-    pass
-
-
-class NdsctlExecutionFailed(Exception):
-    pass
-
-
-class KeyMissingInNdsctlOutput(Exception):
-    pass
-
 class PutVersionError(Exception):
     pass
-
-
-def call_ndsctl(params):
-    args = ['sudo', '/usr/bin/ndsctl']
-    args += params
-    output = subprocess.check_output(args)
-
-    return json.loads(output)
-
-
-def retrieve_client_list(output):
-    clients = output['clients']
-    clientList = []
-    for clientMac, clientInfo in clients.items():
-        client = {}
-        client['mac'] = clientMac
-        client['ip'] = clientInfo['ip']
-        client['token'] = clientInfo['token']
-        clientList.append(client)
-
-    return clientList
-
-
-def get_client_from_ip(ip):
-    try:
-        ndsctlOutput = call_ndsctl(['json'])
-    except OSError as e:
-        raise NdsctlExecutionFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise NdsctlExecutionFailed(str(e))
-
-    try:
-        clientList = retrieve_client_list(ndsctlOutput)
-    except KeyError as e:
-        raise KeyMissingInNdsctlOutput(str(e))
-
-    for client in clientList:
-        if client['ip'] == ip:
-            return client
-    result = {}
-    result['ip'] = ip
-    result['mac'] = '22:22:22:22:22:22'
-    result['token'] = 'token'
-    return result
-
-
-def authenticate_customer(ip):
-    try:
-        call_ndsctl(['auth', ip])
-    except OSError as e:
-        raise AuthenticationFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise AuthenticationFailed(str(e))
-
-
-def get_ip_from_request(request):
-    if request.headers.getlist("X-Forwarded-For"):
-        ip = request.headers.getlist("X-Forwarded-For")[0]
-    else:
-        ip = request.remote_addr
-    return ip
 
 
 def sign(public_key, secret_key, data):
@@ -89,6 +17,7 @@ def sign(public_key, secret_key, data):
     )
     h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
     return str(h.hexdigest())
+
 
 def put_box_version(commitHash):
     boxVersion = {}
@@ -101,7 +30,6 @@ def put_box_version(commitHash):
         )
     except Exception:
         raise PutVersionError('Error while putting the version to the backend.')
-
 
 
 def post_box_status(
@@ -155,7 +83,7 @@ def dict_deep_replace(dict, occurrence, replacement):
     for k, v in dict.items():
         dict[k] = deep_replace(v, occurrence, replacement)
 
-    return dict 
+    return dict
 
 
 def list_deep_replace(list, occurrence, replacement):
@@ -186,5 +114,13 @@ def replace_host(textObject, original, replacement):
     except json.decoder.JSONDecodeError:
         return textObject
     response_dict = deep_replace(response_dict, original, replacement)
-    response_dict = deep_replace(response_dict, f'https://{replacement}', f'http://{replacement}')
+    response_dict = deep_replace(
+        response_dict,
+        f'https://{replacement}',
+        f'http://{replacement}'
+        )
     return json.dumps(response_dict)
+
+
+def reboot():
+    subprocess.call('/sbin/shutdown -r now', shell=True)
