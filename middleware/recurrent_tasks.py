@@ -1,13 +1,11 @@
 #!/usr/bin/env python3.7
-import sys
-
 from config import apply_config, fetch_config, save_config
 from config import ApplyConfigError, FetchConfigError, SaveConfigError
 from crontab import apply_crontab
 from crontab import ApplyCrontabError
 from update import run_update
 from update import RunUpdateError
-from utils import post_box_status, reboot
+from utils import post_error_status, post_service_status, reboot
 
 
 homePath = '/home/pi'
@@ -48,42 +46,37 @@ if __name__ == '__main__':
     print('---------------Fetch Config---------------')
     try:
         currentConfig, remoteConfig = fetch_config(envFile)
-    except FetchConfigError as e:
-        post_box_status(config_running=False, config_message=str(e))
-        sys.exit(1)
+    except FetchConfigError:
+        post_error_status('config')
     print('------------------------------------------')
     print('----------------Run Update----------------')
     try:
         updateStatus = run_update(repoPath, remoteConfig)
-    except RunUpdateError as e:
-        post_box_status(update_running=False, update_message=str(e))
-        sys.exit(1)
+    except RunUpdateError:
+        post_error_status('update')
     print('------------------------------------------')
 
     if currentConfig != remoteConfig or updateStatus:
         print('---------------Apply Config---------------')
         try:
             apply_config(remoteConfig, configFilesLocations)
-        except ApplyConfigError as e:
-            post_box_status(config_running=False, config_message=str(e))
-            sys.exit(1)
+        except ApplyConfigError:
+            post_error_status('config')
         print('------------------------------------------')
 
         print('--------------Apply Crontab---------------')
         try:
             apply_crontab(remoteConfig, cronFile)
-        except ApplyCrontabError as e:
-            post_box_status(crontab_running=False, crontab_message=str(e))
-            sys.exit(1)
+        except ApplyCrontabError:
+            post_error_status('crontab')
         print('------------------------------------------')
 
         print('----------------Save Config---------------')
         try:
             save_config(remoteConfig, envFile)
-        except SaveConfigError as e:
-            post_box_status(config_running=False, config_message=str(e))
-            sys.exit(1)
+        except SaveConfigError:
+            post_error_status('config')
         print('------------------------------------------')
         reboot()
 
-    post_box_status(True)
+    post_service_status()
