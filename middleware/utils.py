@@ -17,12 +17,7 @@ class NdsctlExecutionFailed(Exception):
 class KeyMissingInNdsctlOutput(Exception):
     pass
 
-
-class CrontabExecutionFailed(Exception):
-    pass
-
-
-class CronWritingError(Exception):
+class PutVersionError(Exception):
     pass
 
 
@@ -94,33 +89,6 @@ def sign(public_key, secret_key, data):
     )
     h.update(json.dumps(data, sort_keys=True).encode('utf-8'))
     return str(h.hexdigest())
-
-
-def get_crons(config):
-    crons = []
-    for key, value in config.items():
-        if key.startswith('CRON_'):
-            crons.append(value)
-    return crons
-
-
-def write_crons(crons, file):
-    with open(file, 'w') as file:
-        for cron in crons:
-            try:
-                file.write(f'{cron}\n')
-            except IOError as e:
-                raise CronWritingError(str(e))
-
-
-def save_crons(file):
-    try:
-        subprocess.check_call(['sudo', '/usr/bin/crontab', file])
-    except OSError as e:
-        raise CrontabExecutionFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise CrontabExecutionFailed(str(e))
-
 
 def put_box_version(commitHash):
     boxVersion = {}
