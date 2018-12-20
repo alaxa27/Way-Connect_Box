@@ -8,7 +8,9 @@ import requests
 import subprocess
 import sys
 
-from utils import sign, post_box_status, put_box_version, get_crons, write_crons, save_crons
+from crontab import apply_crontab
+from crontab import ApplyCrontabError
+from utils import sign, post_box_status, put_box_version
 import utils
 
 homePath = '/home/pi'
@@ -41,11 +43,6 @@ configFilesLocations = {
 
 
 class ApplyCommitError(Exception):
-    def __init__(self, message):
-        super().__init__(f'ApplyCommitError: ${message}')
-
-
-class ApplyCrontabError(Exception):
     pass
 
 
@@ -58,8 +55,7 @@ class BranchDoesNotExist(Exception):
 
 
 class FetchConfigError(Exception):
-    def __init__(self, message):
-        super().__init__(f'FetchConfigError: ${message}')
+    pass
 
 
 class FetchEstablishmentError(Exception):
@@ -286,32 +282,6 @@ def run_update(repoPath, config):  # noqa: C901
         raise RunningUpdateError(e)
     print('OK')
     return True
-
-
-def apply_crontab(config, cronFile):
-    print('Retrieving crons from config...', end='')
-    try:
-        crons = get_crons(config)
-    except KeyError as e:
-        print('FAIL')
-        raise UnableToApplyCrontab(str(e))
-    print('OK')
-
-    print('Writing crons to cronjob file...', end='')
-    try:
-        write_crons(crons, cronFile)
-    except utils.CronWritingError as e:
-        print('FAIL')
-        raise UnableToApplyCrontab(str(e))
-    print('OK')
-    
-    print('Saving new crons...', end='')
-    try:
-        save_crons(cronFile)
-    except utils.CrontabExecutionFailed as e:
-        print('FAIL')
-        raise UnableToApplyCrontab(str(e))
-    print('OK')
 
 
 if __name__ == '__main__':
