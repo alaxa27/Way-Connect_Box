@@ -8,6 +8,10 @@ import subprocess
 from utils import sign
 
 
+class ApplyConfigError(Exception):
+    pass
+
+
 class FetchConfigError(Exception):
     pass
 
@@ -32,43 +36,12 @@ class MissingKeyInConfig(Exception):
     pass
 
 
-class WriteConfigError(Exception):
+class SaveConfigError(Exception):
     pass
 
 
-def get_config_key(config, key):
-    try:
-        value = config[key]
-    except KeyError as key:
-        raise MissingKeyInConfig(f'{key} key is missing in configuration.')
-    return value
-
-
-def replace_occurences(key, value, fileLocation):
-    with fileinput.FileInput(fileLocation, inplace=True) as file:
-        for line in file:
-            print(line.replace(f'WC_{key}', value), end='')
-
-
-def get_current_config(configPath):
-    return main.dotenv_values(configPath)
-
-
-def copy_default_config(fromDir, toDir):
-    subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
-
-
-def reboot():
-    subprocess.call('/sbin/shutdown -r now', shell=True)
-
-
-def save_config(config, configPath):
-    try:
-        with open(configPath, 'w') as file:
-            for key, value in config.items():
-                file.write(f'{key}="{value}"\n')
-    except Exception:
-        raise WriteConfigError()
+class WriteConfigError(Exception):
+    pass
 
 
 def apply_config(config, configFiles):
@@ -79,6 +52,42 @@ def apply_config(config, configFiles):
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:
             replace_occurences(varName, config[varName], fileLocation)
+
+
+def copy_default_config(fromDir, toDir):
+    subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
+
+
+
+def fetch_config(envPath):
+    print('Retrieving current config...', end='')
+    try:
+        currentConfig = get_current_config(envPath)
+    except GetCurrentConfigError as e:
+        print('FAIL')
+        raise FetchConfigError(e)
+    print('OK')
+
+    print('Retrieving remote config...', end='')
+    try:
+        remoteConfig = get_remote_config()
+    except GetRemoteConfigError as e:
+        print('FAIL')
+        raise FetchConfigError(e)
+    print('OK')
+    return currentConfig, remoteConfig
+
+
+def get_config_key(config, key):
+    try:
+        value = config[key]
+    except KeyError as key:
+        raise MissingKeyInConfig(f'{key} key is missing in configuration.')
+    return value
+
+
+def get_current_config(configPath):
+    return main.dotenv_values(configPath)
 
 
 def get_remote_config():
@@ -119,21 +128,16 @@ def get_remote_config():
     return response
 
 
-def fetch_config(envPath):
-    print('Retrieving current config...', end='')
-    try:
-        currentConfig = get_current_config(envPath)
-    except GetCurrentConfigError as e:
-        print('FAIL')
-        raise FetchConfigError(e)
-    print('OK')
+def replace_occurences(key, value, fileLocation):
+    with fileinput.FileInput(fileLocation, inplace=True) as file:
+        for line in file:
+            print(line.replace(f'WC_{key}', value), end='')
 
-    print('Retrieving remote config...', end='')
-    try:
-        remoteConfig = get_remote_config()
-    except GetRemoteConfigError as e:
-        print('FAIL')
-        raise FetchConfigError(e)
-    print('OK')
-    return currentConfig, remoteConfig
 
+def save_config(config, configPath):
+    try:
+        with open(configPath, 'w') as file:
+            for key, value in config.items():
+                file.write(f'{key}="{value}"\n')
+    except Exception:
+        raise WriteConfigError()

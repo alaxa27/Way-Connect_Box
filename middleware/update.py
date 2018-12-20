@@ -22,7 +22,7 @@ class HeadAlreadyExists(Exception):
     pass
 
 
-class RunningUpdateError(Exception):
+class RunUpdateError(Exception):
     pass
 
 
@@ -73,21 +73,21 @@ def run_update(repoPath, config):  # noqa: C901
     try:
         fetch_repo(repo)
     except UpdateFetchingError as e:
-        raise RunningUpdateError(e)
+        raise RunUpdateError(e)
     print('OK')
 
     print('Retrieving branch ID from config...', end='')
     try:
         branch = get_config_key(config, 'GIT_BRANCH')
     except MissingKeyInConfig as e:
-        raise RunningUpdateError(e)
+        raise RunUpdateError(e)
     print('OK')
 
     print('Checking if branch exists...', end='')
     try:
         check_branch_exist(repo, branch)
     except BranchDoesNotExist as e:
-        raise RunningUpdateError(e)
+        raise RunUpdateError(e)
     except HeadAlreadyExists:
         pass
     print('OK')
@@ -107,7 +107,7 @@ def run_update(repoPath, config):  # noqa: C901
         apply_commit(repo, commit)
     except ApplyCommitError as e:
         print('FAIL')
-        raise RunningUpdateError(e)
+        raise RunUpdateError(e)
     except ApplySameCommitException:
         print('PASS')
         print('Commit already applied.')
@@ -117,6 +117,6 @@ def run_update(repoPath, config):  # noqa: C901
     try:
         put_box_version(commit)
     except PutVersionError as e:
-        raise RunningUpdateError(e)
+        raise RunUpdateError(e)
     print('OK')
     return True
