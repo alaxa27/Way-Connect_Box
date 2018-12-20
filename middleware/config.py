@@ -62,17 +62,17 @@ def fetch_config(envPath):
     print('Retrieving current config...', end='')
     try:
         currentConfig = get_current_config(envPath)
-    except GetCurrentConfigError as e:
+    except GetCurrentConfigError:
         print('FAIL')
-        raise FetchConfigError(e)
+        raise FetchConfigError()
     print('OK')
 
     print('Retrieving remote config...', end='')
     try:
         remoteConfig = get_remote_config()
-    except GetRemoteConfigError as e:
+    except GetRemoteConfigError:
         print('FAIL')
-        raise FetchConfigError(e)
+        raise FetchConfigError()
     print('OK')
     return currentConfig, remoteConfig
 

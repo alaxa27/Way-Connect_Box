@@ -15,7 +15,6 @@ itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
 mccabe==0.6.1
-mock==2.0.0
 pbr==5.1.1
 pycodestyle==2.4.0
 pyflakes==2.0.0

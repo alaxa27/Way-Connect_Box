@@ -17,10 +17,10 @@ class KeyMissingInNdsctlOutput(Exception):
 def authenticate_customer(ip):
     try:
         call_ndsctl(['auth', ip])
-    except OSError as e:
-        raise AuthenticationFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise AuthenticationFailed(str(e))
+    except OSError:
+        raise AuthenticationFailed()
+    except subprocess.SubprocessError:
+        raise AuthenticationFailed()
 
 
 def call_ndsctl(params):
@@ -34,15 +34,15 @@ def call_ndsctl(params):
 def get_client_from_ip(ip):
     try:
         ndsctlOutput = call_ndsctl(['json'])
-    except OSError as e:
-        raise NdsctlExecutionFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise NdsctlExecutionFailed(str(e))
+    except OSError:
+        raise NdsctlExecutionFailed()
+    except subprocess.SubprocessError:
+        raise NdsctlExecutionFailed()
 
     try:
         clientList = retrieve_client_list(ndsctlOutput)
-    except KeyError as e:
-        raise KeyMissingInNdsctlOutput(str(e))
+    except KeyError:
+        raise KeyMissingInNdsctlOutput()
 
     for client in clientList:
         if client['ip'] == ip:

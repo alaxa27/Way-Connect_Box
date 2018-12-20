@@ -21,25 +21,25 @@ def apply_crontab(config, cronFile):
     print('Retrieving crons from config...', end='')
     try:
         crons = get_crons(config)
-    except GetCronError as e:
+    except GetCronError:
         print('FAIL')
-        raise ApplyCrontabError(e)
+        raise ApplyCrontabError()
     print('OK')
 
     print('Writing crons to cronjob file...', end='')
     try:
         write_crons(crons, cronFile)
-    except CronWritingError as e:
+    except CronWritingError:
         print('FAIL')
-        raise ApplyCrontabError(e)
+        raise ApplyCrontabError()
     print('OK')
     
     print('Saving new crons...', end='')
     try:
         save_crons(cronFile)
-    except CrontabExecutionFailed as e:
+    except CrontabExecutionFailed:
         print('FAIL')
-        raise ApplyCrontabError(e)
+        raise ApplyCrontabError()
     print('OK')
 
 
@@ -56,14 +56,14 @@ def write_crons(crons, file):
         for cron in crons:
             try:
                 file.write(f'{cron}\n')
-            except IOError as e:
-                raise CronWritingError(str(e))
+            except IOError:
+                raise CronWritingError()
 
 
 def save_crons(file):
     try:
         subprocess.check_call(['sudo', '/usr/bin/crontab', file])
-    except OSError as e:
-        raise CrontabExecutionFailed(str(e))
-    except subprocess.SubprocessError as e:
-        raise CrontabExecutionFailed(str(e))
+    except OSError:
+        raise CrontabExecutionFailed()
+    except subprocess.SubprocessError:
+        raise CrontabExecutionFailed()
