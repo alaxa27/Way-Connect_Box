@@ -3,12 +3,16 @@ import fileinput
 import os
 from pathlib import Path
 import requests
-import subprocess
+import shutil
 
 from utils import sign
 
 
 class ApplyConfigError(Exception):
+    pass
+
+
+class CopyConfigError(Exception):
     pass
 
 
@@ -40,22 +44,58 @@ class SaveConfigError(Exception):
     pass
 
 
+class RemoveFolderError(Exception):
+    pass
+
+
 class WriteConfigError(Exception):
     pass
 
 
-def apply_config(config, configFiles):
-    for var in configFiles:
-        if var not in config:
-            raise MissingConfigOnServer()
+def apply_config(config, configFiles, configDir, configDestination):
+    tmpPath = '/tmp/wayboxconfigdir'
 
-    for varName, fileLocations in configFiles.items():
-        for fileLocation in fileLocations:
-            replace_occurences(varName, config[varName], fileLocation)
+    print('Removing old temporary folder...', end='')
+    try:
+        remove_folder(tmpPath)
+    except RemoveFolderError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Copying config files to temporary dir...', end='')
+    try:
+        copy_default_config(configDir, tmpPath)
+    except CopyConfigError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Writing config in temporary files...', end='')
+    try:
+        write_config(config, configFiles, tmpPath)
+    except WriteConfigError:
+        print('FAIL')
+        raise ApplyConfigError()
+    except MissingConfigOnServer:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Copying config files to system config folder...', end='')
+    try:
+        copy_default_config(tmpPath, configDestination)
+    except CopyConfigError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
 
 
 def copy_default_config(fromDir, toDir):
-    subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
+    try:
+        shutil.copy_tree(fromDir, toDir)
+    except Exception:
+        raise CopyConfigError()
 
 
 def fetch_config(envPath):
@@ -127,6 +167,15 @@ def get_remote_config():
     return response
 
 
+def remove_folder(path):
+    try:
+        shutil.rmtree(path, ignore_errors=True)
+    except OSError: 
+        raise RemoveFolderError()
+    except FileNotFoundError:
+        pass
+
+
 def replace_occurences(key, value, fileLocation):
     with fileinput.FileInput(fileLocation, inplace=True) as file:
         for line in file:
@@ -140,3 +189,20 @@ def save_config(config, configPath):
                 file.write(f'{key}="{value}"\n')
     except Exception:
         raise WriteConfigError()
+
+
+def write_config(config, configFiles, folder):
+    for var in configFiles:
+        if var not in config:
+            raise MissingConfigOnServer()
+
+    for varName, fileLocations in configFiles.items():
+        for fileLocation in fileLocations:
+            try:
+                replace_occurences(
+                    varName,
+                    config[varName],
+                    f'${folder}{fileLocation}'
+                    )
+            except Exception:
+                raise WriteConfigError()

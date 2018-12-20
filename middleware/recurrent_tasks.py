@@ -12,27 +12,27 @@ homePath = '/home/pi'
 
 configFilesLocations = {
     'INTERFACE_IN': [
-        '/etc/iptables.ipv4.nat',
-        '/etc/network/interfaces'
+        '/iptables.ipv4.nat',
+        '/network/interfaces'
     ],
     'INTERFACE_OUT': [
-        '/etc/nodogsplash/nodogsplash.conf',
-        '/etc/dnsmasq.conf',
-        '/etc/iptables.ipv4.nat',
-        '/etc/network/interfaces'
+        '/nodogsplash/nodogsplash.conf',
+        '/dnsmasq.conf',
+        '/iptables.ipv4.nat',
+        '/network/interfaces'
     ],
     'PORTAL_HOST': [
-        '/etc/nginx/sites-enabled/storage_reverse_proxy.conf',
-        '/etc/nginx/sites-enabled/portal_reverse_proxy.conf'
+        '/nginx/sites-enabled/storage_reverse_proxy.conf',
+        '/nginx/sites-enabled/portal_reverse_proxy.conf'
     ],
     'ESTABLISHMENT_NAME': [
-        '/etc/hostapd/hostapd.conf'
+        '/hostapd/hostapd.conf'
     ],
     'NDS_CLIENT_FORCE_TIMEOUT': [
-        '/etc/nodogsplash/nodogsplash.conf'
+        '/nodogsplash/nodogsplash.conf'
     ],
     'NGROK_SUBDOMAIN': [
-        '/etc/ngrok.yml'
+        '/ngrok.yml'
     ]
 }
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     if currentConfig != remoteConfig or updateStatus:
         print('---------------Apply Config---------------')
         try:
-            apply_config(remoteConfig, configFilesLocations)
+            apply_config(remoteConfig, configFilesLocations, configDir, etcDir)
         except ApplyConfigError:
             post_error_status('config')
         print('------------------------------------------')
