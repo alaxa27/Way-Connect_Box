@@ -58,7 +58,6 @@ def copy_default_config(fromDir, toDir):
     subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
 
 
-
 def fetch_config(envPath):
     print('Retrieving current config...', end='')
     try:

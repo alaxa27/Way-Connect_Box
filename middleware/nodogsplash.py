@@ -59,6 +59,7 @@ def get_ip_from_request(request):
         ip = request.headers.getlist("X-Forwarded-For")[0]
     else:
         ip = request.remote_addr
+    return ip
 
 
 def retrieve_client_list(output):
@@ -72,4 +73,3 @@ def retrieve_client_list(output):
         clientList.append(client)
 
     return clientList
-    return ip
