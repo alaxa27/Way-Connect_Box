@@ -34,7 +34,6 @@ def apply_commit(repo, commit):
     isSameCommit = str(repo.commit()) == commit
     if (isSameCommit):
         raise ApplySameCommitException()
-    print("commit", commit)
     try:
         repo.git.reset(commit, '--hard')
     except Exception:
