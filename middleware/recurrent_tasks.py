@@ -8,7 +8,7 @@ import requests
 import subprocess
 import sys
 
-from utils import sign, post_box_status, get_crons, write_crons, save_crons
+from utils import sign, post_box_status, put_box_version, get_crons, write_crons, save_crons
 import utils
 
 homePath = '/home/pi'
@@ -40,15 +40,33 @@ configFilesLocations = {
 }
 
 
-class FetchConfigError(Exception):
+class ApplyCommitError(Exception):
+    def __init__(self, message):
+        super().__init__(f'ApplyCommitError: ${message}')
+
+
+class ApplyCrontabError(Exception):
     pass
+
+
+class ApplySameCommitException(Exception):
+    pass
+
+
+class BranchDoesNotExist(Exception):
+    pass
+
+
+class FetchConfigError(Exception):
+    def __init__(self, message):
+        super().__init__(f'FetchConfigError: ${message}')
 
 
 class FetchEstablishmentError(Exception):
     pass
 
 
-class UnableToWriteConfig(Exception):
+class HeadAlreadyExists(Exception):
     pass
 
 
@@ -60,31 +78,19 @@ class MissingKeyInConfig(Exception):
     pass
 
 
-class UpdateFetchingError(Exception):
-    pass
-
-
-class HeadAlreadyExists(Exception):
-    pass
-
-
-class BranchDoesNotExist(Exception):
-    pass
-
-
-class ApplyCommitError(Exception):
-    pass
-
-
-class ApplySameCommitException(Exception):
-    pass
-
-
 class PutVersionError(Exception):
     pass
 
 
-class UnableToApplyCrontab(Exception):
+class RunningUpdateError(Exception):
+    pass
+
+
+class UpdateFetchingError(Exception):
+    pass
+
+
+class WriteConfigError(Exception):
     pass
 
 
@@ -121,7 +127,7 @@ def apply_commit(repo, commit):
     try:
         repo.git.reset(commit, '--hard')
     except Exception as e:
-        raise ApplyCommitError(f'Failed to apply commit : {commit}; {str(e)}')
+        raise ApplyCommitError(f'<{commit}> {str(e)}')
 
 
 def get_config_key(config, key):
@@ -169,7 +175,7 @@ def apply_config(config, configFiles):
             replace_occurences(varName, config[varName], fileLocation)
 
 
-def get_box_config():
+def get_remote_config():
     keysPath = Path('/home/pi')
     load_dotenv(dotenv_path=keysPath / 'keys', override=True)
     API_KEY = os.environ['API_KEY']
@@ -207,17 +213,79 @@ def get_box_config():
     return response
 
 
-def put_box_version(commitHash):
-    boxVersion = {}
-    boxVersion['commit_hash'] = commitHash
-
+def fetch_config(envPath):
+    print('Retrieving current config...', end='')
     try:
-        requests.put(
-            url='http://localhost:5000/portal/boxes/version/',
-            json=boxVersion
-        )
-    except Exception:
-        raise PutVersionError('Error while putting the version to the backend.')
+        currentConfig = get_current_config(envPath)
+    except GetCurrentConfigError as e:
+        print('FAIL')
+        raise FetchConfigError(e)
+    print('OK')
+
+    print('Retrieving remote config...', end='')
+    try:
+        remoteConfig = get_remote_config()
+    except GetRemoteConfigError as e:
+        print('FAIL')
+        raise FetchConfigError(e)
+    print('OK')
+    return currentConfig, remoteConfig
+
+
+def run_update(repoPath, config):  # noqa: C901
+    repo = git.Repo(repoPath)
+
+    print('Fetching repo...', end='')
+    try:
+        fetch_repo(repo)
+    except UpdateFetchingError as e:
+        raise RunningUpdateError(e)
+    print('OK')
+
+    print('Retrieving branch ID from config...', end='')
+    try:
+        branch = get_config_key(config, 'GIT_BRANCH')
+    except MissingKeyInConfig as e:
+        raise RunningUpdateError(e)
+    print('OK')
+
+    print('Checking if branch exists...', end='')
+    try:
+        check_branch_exist(repo, branch)
+    except BranchDoesNotExist as e:
+        raise RunningUpdateError(e)
+    except HeadAlreadyExists:
+        pass
+    print('OK')
+
+    print('Retrieving commit ID from config...', end='')
+    try:
+        commit = get_config_key(config, 'GIT_COMMIT')
+        print('OK')
+    except MissingKeyInConfig:
+        print('FAIL')
+        print('Retrieving commit ID from last branch commit...', end='')
+        commit = get_last_commit(repo, branch)
+        print('OK')
+
+    print(f'Applying commit {commit}...', end='')
+    try:
+        apply_commit(repo, commit)
+    except ApplyCommitError as e:
+        print('FAIL')
+        raise RunningUpdateError(e)
+    except ApplySameCommitException:
+        print('PASS')
+        print('Commit already applied.')
+        return False
+
+    print('Sending update confirmation to API...', end='')
+    try:
+        put_box_version(commit)
+    except PutVersionError as e:
+        raise RunningUpdateError(e)
+    print('OK')
+    return True
 
 
 def apply_crontab(config, cronFile):
@@ -246,120 +314,52 @@ def apply_crontab(config, cronFile):
     print('OK')
 
 
-def run_update(repoPath, config):  # noqa: C901
-    repo = git.Repo(repoPath)
-
-    print('Fetching repo...', end='')
-    try:
-        fetch_repo(repo)
-    except UpdateFetchingError as e:
-        post_box_status(True, update_running=False, update_message=str(e))
-        sys.exit(1)
-    print('OK')
-
-    print('Retrieving branch ID from config...', end='')
-    try:
-        branch = get_config_key(config, 'GIT_BRANCH')
-    except MissingKeyInConfig as e:
-        post_box_status(True, update_running=False, update_message=str(e))
-        sys.exit(1)
-    print('OK')
-
-    print('Checking if branch exists...', end='')
-    try:
-        check_branch_exist(repo, branch)
-    except BranchDoesNotExist as e:
-        post_box_status(True, update_running=False, update_message=str(e))
-        sys.exit(1)
-    except HeadAlreadyExists:
-        pass
-    print('OK')
-
-    print('Retrieving commit ID from config...', end='')
-    try:
-        commit = get_config_key(config, 'GIT_COMMIT')
-        print('OK')
-    except MissingKeyInConfig:
-        print('FAIL')
-        print('Retrieving commit ID from last branch commit...', end='')
-        commit = get_last_commit(repo, branch)
-        print('OK')
-
-    print(f'Applying commit {commit}...', end='')
-    try:
-        apply_commit(repo, commit)
-    except ApplyCommitError as e:
-        print('FAIL')
-        print(f'Apply commit error: {e}')
-        post_box_status(True, update_running=False, update_message=str(e))
-        sys.exit(1)
-    except ApplySameCommitException:
-        print('PASS')
-        print('Commit already applied.')
-        return False
-
-    print('Sending update confirmation to API...', end='')
-    try:
-        put_box_version(commit)
-    except PutVersionError as e:
-        post_box_status(True, update_running=False, update_message=str(e))
-        sys.exit(1)
-    print('OK')
-    return True
-
-
 if __name__ == '__main__':
-    envPath = f'{homePath}/env'
+    envFile = f'{homePath}/env'
     repoPath = f'{homePath}/Way-Connect_Box'
+    cronFile = f'{homePath}/cronjobs'
     configDir = f'{repoPath}/config'
     etcDir = '/etc'
 
-    currentConfig = get_current_config(envPath)
+    print('---------------Fetch Config---------------')
     try:
-        remoteConfig = get_box_config()
+        currentConfig, remoteConfig = fetch_config(envFile)
     except FetchConfigError as e:
-        post_box_status(
-            True,
-            internet_connection_active=False,
-            internet_connection_message=f'Error fetching config: {str(e)}'
-        )
-    except FetchEstablishmentError as e:
-        post_box_status(
-            True,
-            internet_connection_active=False,
-            internet_connection_message=f'Error fetching establishment:{str(e)}'
-        )
-
-    print('--------------Running update--------------')
-    updateStatus = run_update(repoPath, remoteConfig)
+        post_box_status(config_running=False, config_message=str(e))
+        sys.exit(1)
+    print('------------------------------------------')
+    print('----------------Run Update----------------')
+    try:
+        updateStatus = run_update(repoPath, remoteConfig)
+    except RunningUpdateError as e:
+        post_box_status(update_running=False, update_message=str(e))
+        sys.exit(1)
     print('------------------------------------------')
 
-    if remoteConfig != currentConfig or updateStatus:
-        copy_default_config(configDir, etcDir)
+    if currentConfig != remoteConfig or updateStatus:
+        print('---------------Apply Config---------------')
         try:
             apply_config(remoteConfig, configFilesLocations)
-        except MissingConfigOnServer:
-            post_box_status(False)
+        except ApplyConfigError as e:
+            post_box_status(config_running=False, config_message=str(e))
             sys.exit(1)
+        print('------------------------------------------')
 
+        print('--------------Apply Crontab---------------')
         try:
-            save_config(remoteConfig, envPath)
-        except UnableToWriteConfig:
+            apply_crontab(remoteConfig, cronFile)
+        except ApplyCrontabError as e:
+            post_box_status(crontab_running=False, crontab_running=str(e))
             sys.exit(1)
+        print('------------------------------------------')
 
+        print('----------------Save Config---------------')
+        try:
+            save_config(remoteConfig, envFile)
+        except SaveConfigError as e:
+            post_box_status(config_running=False, config_message=str(e))
+            sys.exit(1)
+        print('------------------------------------------')
         reboot()
-        
-    cronFile = f'{homePath}/cronjobs'
-    print('------------Applying crontabs------------')
-    try:
-        apply_crontab(remoteConfig, cronFile)
-    except UnableToApplyCrontab as e:
-        post_box_status(
-            False,
-            update_running=False,
-            update_message=f'Error applying crontab: {str(e)}'
-            )
-        sys.exit(1)
-    print('-----------------------------------------')
 
     post_box_status(True)

@@ -122,12 +122,30 @@ def save_crons(file):
         raise CrontabExecutionFailed(str(e))
 
 
+def put_box_version(commitHash):
+    boxVersion = {}
+    boxVersion['commit_hash'] = commitHash
+
+    try:
+        requests.put(
+            url='http://localhost:5000/portal/boxes/version/',
+            json=boxVersion
+        )
+    except Exception:
+        raise PutVersionError('Error while putting the version to the backend.')
+
+
+
 def post_box_status(
     state,
+    config_running=True,
+    config_message='Default message.',
     internet_connection_active=True,
     internet_connection_message='Default message.',
     update_running=True,
     update_message='Default message.',
+    crontab_running=True,
+    crontab_message='Default message',
     nodogsplash_running=True,
     nodogsplash_message='Default message.'
 ):
