@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import requests
 import shutil
+import subprocess
 
 from utils import sign
 
@@ -94,6 +95,13 @@ def apply_config(config, configFiles, configDir, configDestination):
 def copy_default_config(fromDir, toDir):
     try:
         shutil.copytree(fromDir, toDir)
+    except FileExistsError:
+        try:
+            subprocess.call(f'cp -R {fromDir}/* {toDir}/', shell=True)
+        except OSError:
+            raise CopyConfigError()
+        except subprocess.SubprocessError:
+            raise CopyConfigError()
     except Exception:
         raise CopyConfigError()
 
