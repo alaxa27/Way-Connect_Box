@@ -93,7 +93,7 @@ def apply_config(config, configFiles, configDir, configDestination):
 
 def copy_default_config(fromDir, toDir):
     try:
-        shutil.copy_tree(fromDir, toDir)
+        shutil.copytree(fromDir, toDir)
     except Exception:
         raise CopyConfigError()
 
