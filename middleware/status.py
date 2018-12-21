@@ -52,11 +52,11 @@ def post_box_status(
     boxStatus['connected_customers'] = 0
 
     try:
-        requests.post(
+        response = requests.post(
             url='http://localhost:5000/portal/boxes/status/',
             json=boxStatus
         )
-    except requests.RequestException:
+    except requests.RequestException(response):
         raise PostBoxStatusError()
 
 
