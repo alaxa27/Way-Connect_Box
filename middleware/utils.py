@@ -136,6 +136,8 @@ def post_service_status():
     for service in services:
         status_dict = retrieve_service_status(service['from'])
         status_state = service_state(status_dict)
+        if status_state:
+            status_dict = {}
         request[service['to']] = {
             'running': status_state,
             'message': str(status_dict)
