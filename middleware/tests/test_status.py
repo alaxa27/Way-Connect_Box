@@ -43,7 +43,7 @@ class TestStatus(TestCase):
     @patch('status.post_box_status')
     def test_post_service_status(
         state,
-        postBoxStatusMock
+        postBoxStatusMock,
     ):
         def retrieve_service_status_side_effect(serviceName):
             if serviceName == 'ngrok':

@@ -57,7 +57,7 @@ def post_box_status(
             json=boxStatus
         )
     except requests.RequestException:
-        raise PostBoxStatusError(Exception)
+        raise PostBoxStatusError()
 
 
 def post_error_status(type):
