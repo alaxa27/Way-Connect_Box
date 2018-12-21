@@ -1,7 +1,12 @@
+from dotenv import load_dotenv
+import os
+from pathlib import Path
 import requests
 import traceback
 import subprocess
 import sys
+
+from utils import sign
 
 
 class PostBoxStatusError(Exception):
@@ -51,12 +56,24 @@ def post_box_status(
     boxStatus['update_message'] = update_message
     boxStatus['connected_customers'] = 0
 
+    keysPath = Path('/home/pi')
+    load_dotenv(dotenv_path=keysPath / 'keys', override=True)
+    API_HOST = os.environ['API_HOST']
+    API_KEY = os.environ['API_KEY']
+    API_SECRET = os.environ['API_SECRET']
+    signature = sign(API_KEY, API_SECRET, boxStatus)
+    headers = {}
+    headers['Host'] = API_HOST
+    headers['X-API-Key'] = API_KEY
+    headers['X-API-Sign'] = signature
+    response = requests.post(
+        url=f'http://{API_HOST}/portal/boxes/status/',
+        json=boxStatus,
+        headers=headers
+    )
     try:
-        response = requests.post(
-            url='http://localhost:5000/portal/boxes/status/',
-            json=boxStatus
-        )
-    except requests.RequestException(response):
+        response.raise_for_status()
+    except requests.HTTPError:
         raise PostBoxStatusError()
 
 

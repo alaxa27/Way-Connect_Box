@@ -166,7 +166,8 @@ def get_remote_config():
         remoteConfig = requests.get(
             url=f'https://{apiHost}/boxes/config/', headers=headers
         )
-    except Exception:
+        remoteConfig.raise_for_status()
+    except requests.HTTPError:
         raise FetchConfigError()
 
     response = remoteConfig.json()
@@ -177,7 +178,8 @@ def get_remote_config():
             url=f'http://{remoteHost}/customers/establishment/',
             headers=headers
         )
-    except Exception:
+        establishmentInfo.raise_for_status()
+    except requests.HTTPError:
         raise FetchEstablishmentError()
 
     response['ESTABLISHMENT_NAME'] = establishmentInfo.json()['name']

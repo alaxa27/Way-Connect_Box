@@ -32,7 +32,7 @@ def authenticate():
     ip = get_ip_from_request(request)
     try:
         client = get_client_from_ip(str(ip))
-    except NdsctlExecutionFailed as e:
+    except NdsctlExecutionFailed:
         post_error_status('nodogsplash')
         return (f'Error authenticating: {ip}', 400)
 

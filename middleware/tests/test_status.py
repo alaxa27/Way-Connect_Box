@@ -1,3 +1,4 @@
+import requests
 import traceback
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
@@ -63,7 +64,9 @@ class TestStatus(TestCase):
             name='status.retrieve_service_status',
             side_effect=retrieve_service_status_side_effect
             )
-        with patch('status.retrieve_service_status', retrieveServiceStatusMock),\
+        with patch(
+            'status.retrieve_service_status',
+            retrieveServiceStatusMock),\
                 patch('status.service_state', serviceStateMock):
             status.post_service_status()
 
@@ -94,3 +97,11 @@ class TestStatus(TestCase):
         expectedResult = False
 
         self.assertEqual(result, expectedResult)
+
+    def test_post_box_status_raise_for_status(self):
+        raiseMock = MagicMock(
+            name='response.raise_for_status',
+            side_effect=requests.HTTPError('test')
+            )
+        with patch('requests.post', raiseMock):
+            self.assertRaises(status.PostBoxStatusError, status.post_box_status)
