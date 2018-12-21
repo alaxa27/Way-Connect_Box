@@ -73,9 +73,10 @@ class TestUtils(TestCase):
         result = utils.replace_host('', 'A', 'B')
         assert(result == '')
 
+    @patch('traceback.print_exc')
     @patch('sys.exit')
     @patch('utils.post_box_status')
-    def test_post_error_status(self, mock, _):
+    def test_post_error_status(self, postMock, _, printExcMock):
         """should return the correct traceback and type"""
         type = 'testType'
         try:
@@ -92,7 +93,8 @@ class TestUtils(TestCase):
             'error_traceback': str(tb)
         }
 
-        mock.assert_called_with(
+        postMock.assert_called_with(
             internet_connection_active=False,
             internet_connection_message=expectedMessage
             )
+        printExcMock.assert_called()

@@ -94,8 +94,9 @@ def post_error_status(type):
     error['error_traceback'] = traceback.format_exc()
     post_box_status(
         internet_connection_active=False,
-        internet_connection_message=str(error)
+        internet_connection_message=error
         )
+    traceback.print_exc()
     sys.exit(1)
 
 
