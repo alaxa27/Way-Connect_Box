@@ -12,6 +12,14 @@ class PutVersionError(Exception):
     pass
 
 
+class RetrieveServiceStatusError(Exception):
+    pass
+
+
+class ServiceStateError(Exception):
+    pass
+
+
 def deep_replace(object, occurrence, replacement):
     if type(object) is dict:
         return dict_deep_replace(object, occurrence, replacement)
@@ -101,8 +109,50 @@ def post_error_status(type):
 
 
 def post_service_status():
+    services = [
+        {
+            'from': 'middleware',
+            'to': 'dhcpd'
+        },
+        {
+            'from': 'nginx',
+            'to': 'dnsmasq'
+        },
+        {
+            'from': 'hostapd',
+            'to': 'hostapd',
+        },
+        {
+            'from': 'nodogsplash',
+            'to': 'nodogsplash'
+        },
+        {
+            'from': 'ngrok',
+            'to': 'update'
+        },
+    ]
+
+    request = {}
+    for service in services:
+        status_dict = retrieve_service_status(service['from'])
+        status_state = service_state(status_dict)
+        request[service['to']] = {
+            'running': status_state,
+            'message': str(status_dict)
+        }
     # Retrieve services status
-    post_box_status()
+    post_box_status(
+        dhcpd_running=request['dhcpd']['running'],
+        dhcpd_message=request['dhcpd']['message'],
+        dnsmasq_running=request['dnsmasq']['running'],
+        dnsmasq_message=request['dnsmasq']['message'],
+        hostapd_running=request['hostapd']['running'],
+        hostapd_message=request['hostapd']['message'],
+        nodogsplash_running=request['nodogsplash']['running'],
+        nodogsplash_message=request['nodogsplash']['message'],
+        update_running=request['update']['running'],
+        update_message=request['update']['message'],
+    )
 
 
 def put_box_version(commitHash):
@@ -134,6 +184,35 @@ def replace_host(textObject, original, replacement):
         f'http://{replacement}'
         )
     return json.dumps(response_dict)
+
+
+def retrieve_service_status(serviceName):
+    try:
+        key_value = subprocess.check_output([
+            'systemctl', 'show', sys.argv[1]],
+             universal_newlines=True).split('\n')
+    except subprocess.SubprocessError:
+        raise RetrieveServiceStatusError()
+    except OSError:
+        raise RetrieveServiceStatusError()
+
+    json_dict = {}
+    for entry in key_value:
+        kv = entry.split("=", 1)
+        if len(kv) == 2:
+            json_dict[kv[0]] = kv[1]
+
+    return json_dict
+
+
+def service_state(statusDict):
+    try:
+        activeState = statusDict['ActiveState']
+    except KeyError:
+        raise ServiceStateError()
+    if activeState == 'active':
+        return True
+    return False
 
 
 def sign(public_key, secret_key, data):
