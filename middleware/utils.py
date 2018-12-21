@@ -188,9 +188,9 @@ def replace_host(textObject, original, replacement):
 
 def retrieve_service_status(serviceName):
     try:
-        key_value = subprocess.check_output([
-            'systemctl', 'show', sys.argv[1]],
-             universal_newlines=True).split('\n')
+        key_value = subprocess.check_output(
+            ['/bin/systemctl', 'show', serviceName],
+            universal_newlines=True).split('\n')
     except subprocess.SubprocessError:
         raise RetrieveServiceStatusError()
     except OSError:

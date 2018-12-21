@@ -189,7 +189,7 @@ def get_remote_config():
 
 def reload_daemons():
     try:
-        subprocess.call('/sbin/systemctl daemon-reload', shell=True)
+        subprocess.call('/bin/systemctl daemon-reload', shell=True)
     except subprocess.SubprocessError:
         raise ReloadDaemonsError()
     except OSError:
