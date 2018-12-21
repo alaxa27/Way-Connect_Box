@@ -56,8 +56,8 @@ def post_box_status(
     boxStatus['update_message'] = update_message
     boxStatus['connected_customers'] = 0
 
-    keysPath = Path('/home/pi')
-    load_dotenv(dotenv_path=keysPath / 'keys', override=True)
+    envPath = Path('/home/pi')
+    load_dotenv(dotenv_path=envPath / 'env', override=True)
     API_HOST = os.environ['API_HOST']
     API_KEY = os.environ['API_KEY']
     API_SECRET = os.environ['API_SECRET']
