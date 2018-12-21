@@ -212,12 +212,18 @@ def replace_occurences(key, value, fileLocation):
 
 
 def save_config(config, configPath):
+    print('Saving config...', end='')
     try:
         with open(configPath, 'w') as file:
             for key, value in config.items():
                 file.write(f'{key}="{value}"\n')
-    except Exception:
+    except IOError:
+        print('FAIL')
         raise WriteConfigError()
+    except OSError:
+        print('FAIL')
+        raise WriteConfigError()
+    print('OK')
 
 
 def write_config(config, configFiles, configDir):

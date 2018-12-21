@@ -4,6 +4,14 @@ import subprocess
 import sys
 
 
+class PostBoxStatusError(Exception):
+    pass
+
+
+class PostServiceStatusError(Exception):
+    pass
+
+
 class RetrieveServiceStatusError(Exception):
     pass
 
@@ -43,10 +51,13 @@ def post_box_status(
     boxStatus['update_message'] = update_message
     boxStatus['connected_customers'] = 0
 
-    requests.post(
-        url='http://localhost:5000/portal/boxes/status/',
-        json=boxStatus
-    )
+    try:
+        requests.post(
+            url='http://localhost:5000/portal/boxes/status/',
+            json=boxStatus
+        )
+    except requests.RequestException:
+        raise PostBoxStatusError(Exception)
 
 
 def post_error_status(type):
@@ -86,8 +97,13 @@ def post_service_status():
     ]
 
     request = {}
+    print('Retrieving statuses...', end='')
     for service in services:
-        status_dict = retrieve_service_status(service['from'])
+        try:
+            status_dict = retrieve_service_status(service['from'])
+        except RetrieveServiceStatusError:
+            print('FAIL')
+            raise PostServiceStatusError()
         status_state = service_state(status_dict)
         if status_state:
             status_dict = {}
@@ -95,19 +111,26 @@ def post_service_status():
             'running': status_state,
             'message': str(status_dict)
         }
+    print('OK')
     # Retrieve services status
-    post_box_status(
-        dhcpd_running=request['dhcpd']['running'],
-        dhcpd_message=request['dhcpd']['message'],
-        dnsmasq_running=request['dnsmasq']['running'],
-        dnsmasq_message=request['dnsmasq']['message'],
-        hostapd_running=request['hostapd']['running'],
-        hostapd_message=request['hostapd']['message'],
-        nodogsplash_running=request['nodogsplash']['running'],
-        nodogsplash_message=request['nodogsplash']['message'],
-        update_running=request['update']['running'],
-        update_message=request['update']['message'],
-    )
+    print('Posting box status service...', end='')
+    try:
+        post_box_status(
+            dhcpd_running=request['dhcpd']['running'],
+            dhcpd_message=request['dhcpd']['message'],
+            dnsmasq_running=request['dnsmasq']['running'],
+            dnsmasq_message=request['dnsmasq']['message'],
+            hostapd_running=request['hostapd']['running'],
+            hostapd_message=request['hostapd']['message'],
+            nodogsplash_running=request['nodogsplash']['running'],
+            nodogsplash_message=request['nodogsplash']['message'],
+            update_running=request['update']['running'],
+            update_message=request['update']['message'],
+        )
+    except PostBoxStatusError:
+        print('FAIL')
+        raise PostServiceStatusError()
+    print('OK')
 
 
 def retrieve_service_status(serviceName):

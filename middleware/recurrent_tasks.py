@@ -3,9 +3,11 @@ from config import apply_config, fetch_config, save_config
 from config import ApplyConfigError, FetchConfigError, SaveConfigError
 from crontab import apply_crontab
 from crontab import ApplyCrontabError
+from status import post_service_status, post_error_status
+from status import PostServiceStatusError
 from update import run_update
 from update import RunUpdateError
-from utils import post_error_status, post_service_status, reboot
+from utils import reboot
 
 
 homePath = '/home/pi'
@@ -79,4 +81,9 @@ if __name__ == '__main__':
         print('------------------------------------------')
         reboot()
 
-    post_service_status()
+    print('------------Post Service Status-----------')
+    try:
+        post_service_status()
+    except PostServiceStatusError:
+        post_error_status('status')
+    print('------------------------------------------')
