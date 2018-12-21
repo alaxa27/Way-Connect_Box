@@ -6,10 +6,10 @@ from urllib.parse import urlencode
 
 from nodogsplash import get_client_from_ip, get_ip_from_request
 from nodogsplash import NdsctlExecutionFailed
+from status import post_error_status
 from utils import (
     replace_host,
     sign,
-    post_box_status,
 )
 
 
@@ -33,11 +33,7 @@ def authenticate():
     try:
         client = get_client_from_ip(str(ip))
     except NdsctlExecutionFailed as e:
-        post_box_status(
-            True,
-            nodogsplash_running=False,
-            nodogsplash_message=str(e)
-            )
+        post_error_status('nodogsplash')
         return (f'Error authenticating: {ip}', 400)
 
     params = {
