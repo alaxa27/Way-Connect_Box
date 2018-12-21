@@ -11,4 +11,4 @@ class TestConfig(TestCase):
     @patch('subprocess.call')
     def test_reload_daemons(self, callMock):
         config.reload_daemons()
-        callMock.assert_called_with('/sbin/systemctl daemon-reload', shell=True)
+        callMock.assert_called_with('/bin/systemctl daemon-reload', shell=True)

@@ -1,9 +1,8 @@
 import git
+import requests
 
 from config import get_config_key
 from config import MissingKeyInConfig
-from utils import put_box_version
-from utils import PutVersionError
 
 
 class ApplyCommitError(Exception):
@@ -19,6 +18,10 @@ class BranchDoesNotExist(Exception):
 
 
 class HeadAlreadyExists(Exception):
+    pass
+
+
+class PutVersionError(Exception):
     pass
 
 
@@ -59,6 +62,19 @@ def fetch_repo(repo):
 
 def get_last_commit(repo, branch):
     return str(repo.commit(f'origin/{branch}'))
+
+
+def put_box_version(commitHash):
+    boxVersion = {}
+    boxVersion['commit_hash'] = commitHash
+
+    try:
+        requests.put(
+            url='http://localhost:5000/portal/boxes/version/',
+            json=boxVersion
+        )
+    except Exception:
+        raise PutVersionError()
 
 
 def run_update(repoPath, config):  # noqa: C901
