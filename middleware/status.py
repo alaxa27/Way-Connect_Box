@@ -67,7 +67,7 @@ def post_box_status(
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
     response = requests.post(
-        url=f'http://{API_HOST}/portal/boxes/status/',
+        url=f'http://{API_HOST}/boxes/status/',
         json=boxStatus,
         headers=headers
     )
