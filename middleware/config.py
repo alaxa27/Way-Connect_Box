@@ -45,6 +45,10 @@ class SaveConfigError(Exception):
     pass
 
 
+class ReloadDaemonsError(Exception):
+    pass
+
+
 class RemoveFolderError(Exception):
     pass
 
@@ -87,6 +91,14 @@ def apply_config(config, configFiles, configDir, configDestination):
     try:
         copy_default_config(tmpPath, configDestination)
     except CopyConfigError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Reloading all daemons...', end='')
+    try:
+        reload_daemons()
+    except ReloadDaemonsError:
         print('FAIL')
         raise ApplyConfigError()
     print('OK')
@@ -173,6 +185,15 @@ def get_remote_config():
     response['API_SECRET'] = API_SECRET
     response['NGROK_SUBDOMAIN'] = API_KEY[:8]
     return response
+
+
+def reload_daemons():
+    try:
+        subprocess.call('/sbin/systemctl daemon-reload', shell=True)
+    except subprocess.SubprocessError:
+        raise ReloadDaemonsError()
+    except OSError:
+        raise ReloadDaemonsError()
 
 
 def remove_folder(path):
