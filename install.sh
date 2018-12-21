@@ -51,5 +51,5 @@ git config --global user.name "a"
 cp -R config/* /etc/
 systemctl daemon-reload
 systemctl enable hostapd middleware nginx ngrok nodogsplash
-systemctl start nginx middleware
+mkdir -p /var/nginx/cache
 /home/pi/Way-Connect_Box/middleware/recurrent_tasks.py
