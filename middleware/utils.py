@@ -23,6 +23,14 @@ def dict_deep_replace(dict, occurrence, replacement):
     return dict
 
 
+def get_ip_from_request(request):
+    if request.headers.getlist("X-Forwarded-For"):
+        ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        ip = request.remote_addr
+    return ip
+
+
 def list_deep_replace(list, occurrence, replacement):
     for iteratee, item in enumerate(list):
         list[iteratee] = deep_replace(item, occurrence, replacement)

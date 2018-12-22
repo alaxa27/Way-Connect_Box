@@ -4,6 +4,7 @@ import unittest
 from tests import (
     test_config,
     test_crontab,
+    test_ndsctl,
     test_status,
     test_update,
     test_utils
@@ -17,6 +18,7 @@ suite = unittest.TestSuite()
 # add tests to the test suite
 suite.addTests(loader.loadTestsFromModule(test_config))
 suite.addTests(loader.loadTestsFromModule(test_crontab))
+suite.addTests(loader.loadTestsFromModule(test_ndsctl))
 suite.addTests(loader.loadTestsFromModule(test_status))
 suite.addTests(loader.loadTestsFromModule(test_update))
 suite.addTests(loader.loadTestsFromModule(test_utils))
