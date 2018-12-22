@@ -31,9 +31,10 @@ class NdsctlService:
         try:
             self.call_ndsctl(['auth', 'ip'])
         except NdsctlExecutionFailed:
-            raise AuthenticationFailed()
+            return False
+        return True
 
-    def call_ndsctl(params):
+    def call_ndsctl(self, params):
         args = ['/usr/bin/ndsctl']
         args += params
         try:
@@ -65,7 +66,7 @@ class NdsctlService:
         client = eval(client)
         return client['mac'] 
 
-    def retrieve_client_list(output):
+    def retrieve_client_list(self, output):
         clients = output['clients']
         clientsObject = {}
 
