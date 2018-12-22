@@ -1,8 +1,12 @@
+from dotenv import load_dotenv
 import git
+import os
+from pathlib import Path
 import requests
 
 from config import get_config_key
 from config import MissingKeyInConfig
+from utils import sign
 
 
 class ApplyCommitError(Exception):
@@ -65,12 +69,25 @@ def get_last_commit(repo, branch):
 
 
 def put_box_version(commitHash):
+    envPath = Path('/home/pi')
+    load_dotenv(dotenv_path=envPath / 'env', override=True)
+    API_HOST = os.environ['API_HOST']
+    API_KEY = os.environ['API_KEY']
+    API_SECRET = os.environ['API_SECRET']
+
     boxVersion = {}
     boxVersion['commit_hash'] = commitHash
 
+    signature = sign(API_KEY, API_SECRET, boxVersion)
+
+    headers = {}
+    headers['Host'] = API_HOST
+    headers['X-API-Key'] = API_KEY
+    headers['X-API-Sign'] = signature
+
     try:
         requests.put(
-            url='http://localhost:5000/portal/boxes/version/',
+            url=f'http://{API_HOST}/portal/boxes/version/',
             json=boxVersion
         )
     except Exception:
