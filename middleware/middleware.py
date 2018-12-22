@@ -1,15 +1,14 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_cors import CORS
+from nameko.standalone.rpc import ServiceRpcProxy
 import requests
-from urllib.parse import urlencode
 
-from nodogsplash import get_client_from_ip, get_ip_from_request
-from nodogsplash import NdsctlExecutionFailed
 from status import post_error_status
 from utils import (
     replace_host,
     sign,
+    get_ip_from_request
 )
 
 
@@ -27,22 +26,25 @@ API_KEY = os.environ['API_KEY']
 API_SECRET = os.environ['API_SECRET']
 
 
+NAMEKO_CONFIG = {'AMQP_URI': "amqp://guest:guest@localhost"}
+
+
 @app.route('/portal/customers/authenticate', methods=['GET'])
 def authenticate():
     ip = get_ip_from_request(request)
-    try:
-        client = get_client_from_ip(str(ip))
-    except NdsctlExecutionFailed:
+    with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
+        if proxy.auth_client(str(ip)):
+            return 200
         post_error_status('nodogsplash')
         return (f'Error authenticating: {ip}', 400)
 
-    params = {
-        'tok': client['token'],
-        'redir': 'http://google.com'
-    }
-    url = f'http://192.168.220.2:2050/nodogsplash_auth/?{urlencode(params)}'
-    res = jsonify(url=url)
-    return (res, 200)
+    # params = {
+    #     'tok': client['token'],
+    #     'redir': 'http://google.com'
+    # }
+    # url = f'http://192.168.220.2:2050/nodogsplash_auth/?{urlencode(params)}'
+    # res = jsonify(url=url)
+    # return (res, 200)
 
 
 @app.route(
@@ -87,8 +89,8 @@ def catch_all(path):
     except KeyError:
         mac = '11:11:11:11:11:11'
         if STAGE == 'production':
-            client = get_client_from_ip(str(ip))
-            mac = client['mac']
+            with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
+                mac = proxy.get_client_mac(str(ip))
             
     headers['X-Customer-Mac'] = mac
         
