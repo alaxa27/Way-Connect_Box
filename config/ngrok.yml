@@ -10,3 +10,7 @@ tunnels:
     proto:
       http: 4040
       #addr: 4040
+  monit:
+    subdomain: monit-WC_NGROK_SUBDOMAIN
+    proto:
+      http: 2812
