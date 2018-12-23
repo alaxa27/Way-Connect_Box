@@ -1,0 +1,17 @@
+[Unit]
+Description=Lightweight RPC server
+After=nodogsplash.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=forking
+User=root
+ExecStartPre=/bin/systemctl is-active redis-server 
+ExecStartPre=/bin/systemctl is-active rabbitmq-server
+ExecStartPre=/bin/systemctl is-active nodogsplash
+ExecStart=/usr/local/bin/nameko run --config /home/pi/Way-Connect_Box/middleware/nameko.yaml ndsctl
+RestartSec=1
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

@@ -24,7 +24,7 @@ class UpdateClientsError(Exception):
 class NdsctlService:
     name = 'ndsctl_service'
 
-    redis = Redis('development')
+    redis = Redis('ndsctl')
 
     @rpc
     def auth_client(self, ip):
