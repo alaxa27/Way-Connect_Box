@@ -32,9 +32,9 @@ class NdsctlService:
             response = self.call_ndsctl(['auth', ip])
         except NdsctlExecutionFailed:
             raise AuthenticationFailed()
-        if 'Fail' in str(response):
-            raise AuthenticationFailed('Fail in response.')
-        return True
+        if 'authenticated' in str(response):
+            return True
+        raise AuthenticationFailed('Fail in response.')
 
     def call_ndsctl(self, params):
         args = ['/usr/bin/ndsctl']
