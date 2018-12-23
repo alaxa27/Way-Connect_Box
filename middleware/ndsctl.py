@@ -51,7 +51,7 @@ class NdsctlService:
         try:
             jsonOutput = json.loads(output)
         except json.decoder.JSONDecodeError:
-            return None
+            return output
         return jsonOutput
 
     def delete_inactive_clients(self, activeClients, storedClients):
