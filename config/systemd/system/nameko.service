@@ -1,7 +1,7 @@
 [Unit]
 Description=Lightweight RPC server
-After=redis-server.service rabbitmq-server.service nodogsplash.service
 StartLimitIntervalSec=0
+After=redis-server.service rabbitmq-server.service nodogsplash.service
 
 [Service]
 Type=forking
@@ -11,7 +11,7 @@ EnvironmentFile=/home/pi/env
 ExecStartPre=/bin/systemctl is-active redis-server 
 ExecStartPre=/bin/systemctl is-active rabbitmq-server
 ExecStartPre=/bin/systemctl is-active nodogsplash
-ExecStart=/usr/local/bin/nameko run --config /home/pi/Way-Connect_Box/middleware/nameko.yaml ndsctl
+ExecStart=/bin/sh -c "/usr/local/bin/nameko run --config /home/pi/Way-Connect_Box/middleware/nameko.yaml ndsctl&"
 RestartSec=1
 Restart=on-failure
 
