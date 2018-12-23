@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request
 from flask_cors import CORS
+from nameko.exceptions import RemoteError
 from nameko.standalone.rpc import ServiceRpcProxy
 import requests
 
@@ -33,10 +34,12 @@ NAMEKO_CONFIG = {'AMQP_URI': "amqp://guest:guest@localhost"}
 def authenticate():
     ip = get_ip_from_request(request)
     with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
-        if proxy.auth_client(str(ip)):
-            return 200
-        post_error_status('nodogsplash')
-        return (f'Error authenticating: {ip}', 400)
+        try:
+            proxy.auth_client(str(ip))
+        except RemoteError:
+            post_error_status('ndsctl', exit=False)
+            return f'Error authenticating: {ip}', 400
+        return 'Authentication Successful.', 200
 
     # params = {
     #     'tok': client['token'],

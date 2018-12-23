@@ -8,6 +8,7 @@ samples/
 
 *.pyc
 *.sqlite3
+*.swp
 
 gc_credentials.json
 

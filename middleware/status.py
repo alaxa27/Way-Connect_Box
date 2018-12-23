@@ -77,16 +77,18 @@ def post_box_status(
         raise PostBoxStatusError()
 
 
-def post_error_status(type):
+def post_error_status(type, exit=True):
     error = {}
     error['error_type'] = type
-    error['error_traceback'] = traceback.format_exc()
+    error['error_traceback'] = str(traceback.format_exc())
     post_box_status(
         internet_connection_active=False,
         internet_connection_message=error
         )
     traceback.print_exc()
-    sys.exit(1)
+    if exit:
+        sys.exit(1)
+    return True
 
 
 def post_service_status():

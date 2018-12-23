@@ -29,9 +29,11 @@ class NdsctlService:
     @rpc
     def auth_client(self, ip):
         try:
-            self.call_ndsctl(['auth', 'ip'])
+            response = self.call_ndsctl(['auth', ip])
         except NdsctlExecutionFailed:
-            return False
+            raise AuthenticationFailed()
+        if 'Fail' in str(response):
+            raise AuthenticationFailed('Fail in response.')
         return True
 
     def call_ndsctl(self, params):
@@ -40,11 +42,17 @@ class NdsctlService:
         try:
             output = subprocess.check_output(args)
         except OSError:
-            raise NdsctlExecutionFailed()
+            raise NdsctlExecutionFailed(args)
         except subprocess.SubprocessError:
-            raise NdsctlExecutionFailed()
+            raise NdsctlExecutionFailed(args)
+        except subprocess.CalledProcessError:
+            raise NdsctlExecutionFailed(args)
 
-        return json.loads(output)
+        try:
+            jsonOutput = json.loads(output)
+        except json.decoder.JSONDecodeError:
+            return None
+        return jsonOutput
 
     def delete_inactive_clients(self, activeClients, storedClients):
         for storedClient in storedClients:
@@ -63,8 +71,10 @@ class NdsctlService:
     @rpc
     def get_client_mac(self, ip):
         client = self.redis.get(f'client:{ip}')
-        client = eval(client)
-        return client['mac'] 
+        if client:
+            client = eval(client)
+            return client['mac'] 
+        return '22:22:22:22:22:22'
 
     def retrieve_client_list(self, output):
         clients = output['clients']
@@ -77,7 +87,7 @@ class NdsctlService:
             client['mac'] = clientMac
             client['ip'] = clientIP
             client['token'] = clientInfo['token']
-            clientsObject[f'client:{clientIP}'] = client
+            clientsObject[clientIP] = client
 
         return clientsObject
 
