@@ -1,11 +1,13 @@
 [Unit]
 Description=Lightweight RPC server
-After=nodogsplash.service
+After=redis-server.service rabbitmq-server.service nodogsplash.service
 StartLimitIntervalSec=0
 
 [Service]
 Type=forking
 User=root
+WorkingDirectory=/home/pi/Way-Connect_Box/middleware
+EnvironmentFile=/home/pi/env
 ExecStartPre=/bin/systemctl is-active redis-server 
 ExecStartPre=/bin/systemctl is-active rabbitmq-server
 ExecStartPre=/bin/systemctl is-active nodogsplash
