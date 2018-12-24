@@ -45,10 +45,13 @@ crontab cron
 rm cron
 
 cp env ../
-cp keys ../
+
+echo "API_KEY=\"${1}\"
+API_SECRET=\"${2}\"" > /home/pi/keys
 
 git config --global user.email "a@a.a"
 git config --global user.name "a"
+
 
 cp -R config/* /etc/
 systemctl daemon-reload
