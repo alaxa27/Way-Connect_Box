@@ -232,7 +232,7 @@ def save_config(config, configPath):
 def write_config(config, configFiles, configDir):
     for var in configFiles:
         if var not in config:
-            raise MissingConfigOnServer(f'key: ${var}')
+            raise MissingConfigOnServer(f'key: {var}')
 
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:

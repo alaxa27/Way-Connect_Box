@@ -78,14 +78,25 @@ def post_box_status(
 
 
 def post_error_status(type, exit=True):
+    print('---> Post Error Status')
+    print('Creating error object...', end='')
     error = {}
     error['error_type'] = type
     error['error_traceback'] = str(traceback.format_exc())
-    post_box_status(
-        internet_connection_active=False,
-        internet_connection_message=str(error)
-        )
+    print('OK')
+    print('Posting box status...', end='')
+    try:
+        post_box_status(
+            internet_connection_active=False,
+            internet_connection_message=str(error)
+            )
+    except PostBoxStatusError:
+        print('FAIL')
+        sys.exit(1)
+    print('OK')
+    print('Printing traceback...')
     traceback.print_exc()
+    print('Done.')
     if exit:
         sys.exit(1)
     return True
