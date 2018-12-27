@@ -57,7 +57,7 @@ class WriteConfigError(Exception):
     pass
 
 
-def apply_config(config, configFiles, configDir, configDestination):
+def apply_config(config, configFiles, configDir, configDestination): # noqa:C901
     tmpPath = '/tmp/wayboxconfigdir'
 
     print('Removing old temporary folder...', end='')
@@ -76,9 +76,10 @@ def apply_config(config, configFiles, configDir, configDestination):
         raise ApplyConfigError()
     print('OK')
 
+    configFilesLocation = {k: v['files'] for k, v in configFiles.items()}
     print('Writing config in temporary files...', end='')
     try:
-        write_config(config, configFiles, tmpPath)
+        write_config(config, configFilesLocation, tmpPath)
     except WriteConfigError:
         print('FAIL')
         raise ApplyConfigError()
@@ -95,7 +96,7 @@ def apply_config(config, configFiles, configDir, configDestination):
         raise ApplyConfigError()
     print('OK')
 
-    print('Reloading all daemons...', end='')
+    print('Reloading updated services...', end='')
     try:
         reload_daemons()
     except ReloadDaemonsError:
@@ -231,7 +232,7 @@ def save_config(config, configPath):
 def write_config(config, configFiles, configDir):
     for var in configFiles:
         if var not in config:
-            raise MissingConfigOnServer()
+            raise MissingConfigOnServer(f'key: ${var}')
 
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:

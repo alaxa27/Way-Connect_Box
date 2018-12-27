@@ -32,14 +32,16 @@ NAMEKO_CONFIG = {'AMQP_URI': "amqp://guest:guest@localhost"}
 
 @app.route('/portal/customers/authenticate', methods=['GET'])
 def authenticate():
-    ip = get_ip_from_request(request)
-    with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
-        try:
-            proxy.auth_client(str(ip))
-        except RemoteError:
-            post_error_status('ndsctl', exit=False)
-            return f'Error authenticating: {ip}', 400
-        return 'Authentication Successful.', 200
+    if STAGE == 'production':
+        ip = get_ip_from_request(request)
+        with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
+            try:
+                proxy.auth_client(str(ip))
+            except RemoteError:
+                post_error_status('ndsctl', exit=False)
+                return f'Error authenticating: {ip}', 400
+            return 'Authentication Successful.', 200
+    return 'Dev auth.', 200
 
     # params = {
     #     'tok': client['token'],
@@ -106,7 +108,10 @@ def catch_all(path):
     resp = requests.Session().send(esreq.prepare())
     resp.encoding = 'utf-8'
 
-    resp_text = replace_host(resp.text, 'storage.googleapis.com', 'w.zone:5001')
+    resp_text = resp.text
+    if STAGE == 'production':
+        resp_text = replace_host(resp_text, 'storage.googleapis.com', 'w.zone:5001')
+
     return (resp_text, resp.status_code, resp.headers.items())
 
 

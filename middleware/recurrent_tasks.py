@@ -12,30 +12,61 @@ from utils import reboot
 
 homePath = '/home/pi'
 
-configFilesLocations = {
-    'INTERFACE_IN': [
-        '/iptables.ipv4.nat',
-        '/network/interfaces'
-    ],
-    'INTERFACE_OUT': [
-        '/nodogsplash/nodogsplash.conf',
-        '/dnsmasq.conf',
-        '/iptables.ipv4.nat',
-        '/network/interfaces'
-    ],
-    'PORTAL_HOST': [
-        '/nginx/sites-enabled/storage_reverse_proxy.conf',
-        '/nginx/sites-enabled/portal_reverse_proxy.conf'
-    ],
-    'ESTABLISHMENT_NAME': [
-        '/hostapd/hostapd.conf'
-    ],
-    'NDS_CLIENT_FORCE_TIMEOUT': [
-        '/nodogsplash/nodogsplash.conf'
-    ],
-    'NGROK_SUBDOMAIN': [
-        '/ngrok.yml'
-    ]
+configFiles = {
+    'INTERFACE_IN': {
+        'files': [
+            '/iptables.ipv4.nat',
+            '/network/interfaces'
+        ],
+        'services': [
+            'networking'
+        ]
+    },
+    'INTERFACE_OUT': {
+        'files': [
+            '/nodogsplash/nodogsplash.conf',
+            '/dnsmasq.conf',
+            '/iptables.ipv4.nat',
+            '/network/interfaces'
+        ],
+        'services': [
+            'networking',
+            'dnsmasq',
+            'nodogsplash'
+        ]
+    },
+    'PORTAL_HOST': {
+        'files': [
+            '/nginx/sites-enabled/portal_reverse_proxy.conf'
+        ],
+        'services': [
+            'nginx'
+        ]
+    },
+    'ESTABLISHMENT_NAME': {
+        'files': [
+            '/hostapd/hostapd.conf'
+        ],
+        'services': [
+            'hostapd'
+        ]
+    },
+    'NDS_CLIENT_FORCE_TIMEOUT': {
+        'files': [
+            '/nodogsplash/nodogsplash.conf'
+        ],
+        'services' [
+            'nodogsplash'
+        ]
+    },
+    'NGROK_SUBDOMAIN': {
+        'files': [
+            '/ngrok.yml'
+        ],
+        'services': [
+            'ngrok'
+        ]
+    }
 }
 
 if __name__ == '__main__':
@@ -61,7 +92,7 @@ if __name__ == '__main__':
     if currentConfig != remoteConfig or updateStatus:
         print('---------------Apply Config---------------')
         try:
-            apply_config(remoteConfig, configFilesLocations, configDir, etcDir)
+            apply_config(remoteConfig, configFiles, configDir, etcDir)
         except ApplyConfigError:
             post_error_status('config')
         print('------------------------------------------')
