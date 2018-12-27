@@ -55,7 +55,7 @@ configFiles = {
         'files': [
             '/nodogsplash/nodogsplash.conf'
         ],
-        'services' [
+        'services': [
             'nodogsplash'
         ]
     },
