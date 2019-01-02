@@ -27,11 +27,14 @@ configFiles = {
             '/nodogsplash/nodogsplash.conf',
             '/dnsmasq.conf',
             '/iptables.ipv4.nat',
-            '/network/interfaces'
+            '/network/interfaces',
+            '/hostapd/hostapd.conf',
+            '/systemd/system/hostapd.service'
         ],
         'services': [
             'networking',
             'dnsmasq',
+            'hostapd',
             'nodogsplash'
         ]
     },
