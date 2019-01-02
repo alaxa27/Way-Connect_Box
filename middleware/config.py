@@ -6,7 +6,7 @@ import requests
 import shutil
 import subprocess
 
-from utils import sign
+import utils
 
 
 class ApplyConfigError(Exception):
@@ -41,11 +41,23 @@ class MissingKeyInConfig(Exception):
     pass
 
 
+class MissingKeyInConfigInfo(Exception):
+    pass
+
+
 class SaveConfigError(Exception):
     pass
 
 
 class ReloadDaemonsError(Exception):
+    pass
+
+
+class ReloadServicesError(Exception):
+    pass
+
+
+class ReloadUpdatedServicesError(Exception):
     pass
 
 
@@ -76,10 +88,9 @@ def apply_config(config, configFiles, configDir, configDestination): # noqa:C901
         raise ApplyConfigError()
     print('OK')
 
-    configFilesLocation = {k: v['files'] for k, v in configFiles.items()}
     print('Writing config in temporary files...', end='')
     try:
-        write_config(config, configFilesLocation, tmpPath)
+        write_config(config, configFiles, tmpPath)
     except WriteConfigError:
         print('FAIL')
         raise ApplyConfigError()
@@ -96,7 +107,7 @@ def apply_config(config, configFiles, configDir, configDestination): # noqa:C901
         raise ApplyConfigError()
     print('OK')
 
-    print('Reloading updated services...', end='')
+    print('Reload daemons...', end='')
     try:
         reload_daemons()
     except ReloadDaemonsError:
@@ -157,7 +168,7 @@ def get_remote_config():
     API_SECRET = os.environ['API_SECRET']
     apiHost = 'api.way-connect.com'
 
-    signature = sign(API_KEY, API_SECRET, {})
+    signature = utils.sign(API_KEY, API_SECRET, {})
     headers = {}
     headers['Host'] = apiHost
     headers['X-API-Key'] = API_KEY
@@ -202,10 +213,47 @@ def reload_daemons():
 def remove_folder(path):
     try:
         shutil.rmtree(path, ignore_errors=True)
-    except OSError: 
+    except OSError:
         raise RemoveFolderError()
     except FileNotFoundError:
         pass
+
+
+def reload_services(services):
+    for service in services:
+        if service == 'monit':
+            try:
+                subprocess.call(['monit', 'reload'])
+            except subprocess.SubprocessError:
+                raise ReloadServicesError(f'monit reload')
+        if service == 'reboot':
+            utils.reboot()
+        try:
+            subprocess.call(['systemctl', 'restart', service])
+        except subprocess.SubprocessError:
+            raise ReloadServicesError(service)
+
+
+def reload_updated_services(remote, current, services):
+    for k, remoteConfig in remote.items():
+        try:
+            service = services[k]
+        except KeyError:
+            raise MissingKeyInConfigInfo(f'key: {k}')
+
+        try:
+            currentConfig = current[k]
+        except KeyError:
+            try:
+                reload_services(service)
+            except ReloadServicesError:
+                raise ReloadUpdatedServicesError()
+            continue
+        if currentConfig != remoteConfig:
+            try:
+                reload_services(service)
+            except ReloadServicesError:
+                raise ReloadUpdatedServicesError()
 
 
 def replace_occurences(key, value, fileLocation):

@@ -1,76 +1,25 @@
 #!/usr/bin/env python3.7
-from config import apply_config, fetch_config, save_config
-from config import ApplyConfigError, FetchConfigError, SaveConfigError
+from config import (
+    apply_config,
+    fetch_config,
+    save_config,
+    reload_updated_services
+    )
+from config import (
+    ApplyConfigError,
+    FetchConfigError,
+    SaveConfigError,
+    ReloadUpdatedServicesError
+    )
 from crontab import apply_crontab
 from crontab import ApplyCrontabError
 from status import post_service_status, post_error_status
 from status import PostServiceStatusError
 from update import run_update
 from update import RunUpdateError
-from utils import reboot
 
 
 homePath = '/home/pi'
-
-configFiles = {
-    'INTERFACE_IN': {
-        'files': [
-            '/iptables.ipv4.nat',
-            '/network/interfaces'
-        ],
-        'services': [
-            'networking'
-        ]
-    },
-    'INTERFACE_OUT': {
-        'files': [
-            '/nodogsplash/nodogsplash.conf',
-            '/dnsmasq.conf',
-            '/iptables.ipv4.nat',
-            '/network/interfaces',
-            '/hostapd/hostapd.conf',
-            '/systemd/system/hostapd.service'
-        ],
-        'services': [
-            'networking',
-            'dnsmasq',
-            'hostapd',
-            'nodogsplash'
-        ]
-    },
-    'PORTAL_HOST': {
-        'files': [
-            '/nginx/sites-enabled/portal_reverse_proxy.conf'
-        ],
-        'services': [
-            'nginx'
-        ]
-    },
-    'ESTABLISHMENT_NAME': {
-        'files': [
-            '/hostapd/hostapd.conf'
-        ],
-        'services': [
-            'hostapd'
-        ]
-    },
-    'NDS_CLIENT_FORCE_TIMEOUT': {
-        'files': [
-            '/nodogsplash/nodogsplash.conf'
-        ],
-        'services': [
-            'nodogsplash'
-        ]
-    },
-    'NGROK_SUBDOMAIN': {
-        'files': [
-            '/ngrok.yml'
-        ],
-        'services': [
-            'ngrok'
-        ]
-    }
-}
 
 if __name__ == '__main__':
     envFile = f'{homePath}/env'
@@ -94,6 +43,7 @@ if __name__ == '__main__':
 
     if currentConfig != remoteConfig or updateStatus:
         print('---------------Apply Config---------------')
+        configFiles = {k: v['files'] for k, v in configInformations.items()}
         try:
             apply_config(remoteConfig, configFiles, configDir, etcDir)
         except ApplyConfigError:
@@ -113,7 +63,12 @@ if __name__ == '__main__':
         except SaveConfigError:
             post_error_status('config')
         print('------------------------------------------')
-        reboot()
+        print('------------Reloading Services------------')
+        configServices = {
+            k: v['services'] for k, v in configInformations.items()
+            }
+        reload_updated_services(remoteConfig, currentConfig, configServices)
+        print('------------------------------------------')
 
     print('------------Post Service Status-----------')
     try:
