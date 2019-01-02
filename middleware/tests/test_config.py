@@ -13,9 +13,9 @@ class TestConfig(TestCase):
         config.reload_daemons()
         callMock.assert_called_with('/bin/systemctl daemon-reload', shell=True)
 
-    @patch('config.reload_services')
-    def test_reload_updated_services(self, reloadMock):
-        """Only updated config's services should be reloaded."""
+    @patch('config.restart_services')
+    def test_restart_updated_services(self, restartMock):
+        """Only updated config's services should be restarted."""
         old = {
             'A': 0,
             'B': 3
@@ -29,12 +29,12 @@ class TestConfig(TestCase):
             'B': 'serviceB'
         }
 
-        config.reload_updated_services(new, old, services)
-        reloadMock.assert_called_once_with('serviceA')
+        config.restart_updated_services(new, old, services)
+        restartMock.assert_called_once_with('serviceA')
 
-    @patch('config.reload_services')
-    def test_reload_new_config_service(self, reloadMock):
-        """New config key's service should be reloaded."""
+    @patch('config.restart_services')
+    def test_restart_new_config_service(self, restartMock):
+        """New config key's service should be restarted."""
         old = {
             'A': 0
         }
@@ -47,11 +47,11 @@ class TestConfig(TestCase):
             'B': 'serviceB'
         }
 
-        config.reload_updated_services(new, old, services)
-        reloadMock.assert_called_once_with('serviceB')
+        config.restart_updated_services(new, old, services)
+        restartMock.assert_called_once_with('serviceB')
 
-    def test_reload_config_service_not_in_info(self):
-        """If a service needs to be reload but is not present in the infos
+    def test_restart_config_service_not_in_info(self):
+        """If a service needs to be restarted but is not present in the infos
         it should raise the appropriate error."""
         old = {
             'A': 0
@@ -63,16 +63,49 @@ class TestConfig(TestCase):
         }
         
         with self.assertRaises(config.MissingKeyInConfigInfo):
-            config.reload_updated_services(new, old, services)
+            config.restart_updated_services(new, old, services)
 
     @patch('subprocess.call')
     @patch('utils.reboot')
-    def test_reload_services_monit_reboot(self, rebootMock, subCallMock):
+    def test_restart_services_monit_reboot(self, rebootMock, subCallMock):
         """If monit then reboot needs to be reload, monit reload and systemctl
         restart monit then reboot"""
-        config.reload_services(['monit', 'reboot'])
+        config.restart_services(['monit', 'reboot'])
         subCallMock.assert_has_calls([
             call(['monit', 'reload']),
             call(['systemctl', 'restart', 'monit'])
         ])
         self.assertEqual(rebootMock.call_count, 1)
+
+    def test_get_config_files(self):
+        """Should retrieve the right paths associated with the right key."""
+        remoteConfig = {
+            'A': 1,
+            'FILES_A': 'a;b;c',
+            'SERVICES_A': 'd;e;f',
+            'FILES_B': 'r;t;y'
+        }
+        configFiles = config.get_list_from_config(remoteConfig, 'FILES')
+
+        expectedResult = {
+            'A': ['a', 'b', 'c'],
+            'B': ['r', 't', 'y']
+        }
+        self.assertEqual(configFiles, expectedResult)
+
+    def test_get_config_services(self):
+        """Should retrieve the right services associated with the right key."""
+        remoteConfig = {
+            'A': 1,
+            'FILES_A': 'a;b;c',
+            'SERVICES_A': 'd;e;f',
+            'FILES_B': 'r;t;y',
+            'SERVICES_C': 'p;o;g'
+        }
+        configFiles = config.get_list_from_config(remoteConfig, 'SERVICES')
+
+        expectedResult = {
+            'A': ['d', 'e', 'f'],
+            'C': ['p', 'o', 'g']
+        }
+        self.assertEqual(configFiles, expectedResult)

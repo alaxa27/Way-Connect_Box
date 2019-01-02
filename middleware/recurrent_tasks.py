@@ -2,14 +2,12 @@
 from config import (
     apply_config,
     fetch_config,
-    save_config,
-    reload_updated_services
+    save_config
     )
 from config import (
     ApplyConfigError,
     FetchConfigError,
-    SaveConfigError,
-    ReloadUpdatedServicesError
+    SaveConfigError
     )
 from crontab import apply_crontab
 from crontab import ApplyCrontabError
@@ -43,9 +41,8 @@ if __name__ == '__main__':
 
     if currentConfig != remoteConfig or updateStatus:
         print('---------------Apply Config---------------')
-        configFiles = {k: v['files'] for k, v in configInformations.items()}
         try:
-            apply_config(remoteConfig, configFiles, configDir, etcDir)
+            apply_config(remoteConfig, currentConfig, configDir, etcDir)
         except ApplyConfigError:
             post_error_status('config')
         print('------------------------------------------')
@@ -62,12 +59,6 @@ if __name__ == '__main__':
             save_config(remoteConfig, envFile)
         except SaveConfigError:
             post_error_status('config')
-        print('------------------------------------------')
-        print('------------Reloading Services------------')
-        configServices = {
-            k: v['services'] for k, v in configInformations.items()
-            }
-        reload_updated_services(remoteConfig, currentConfig, configServices)
         print('------------------------------------------')
 
     print('------------Post Service Status-----------')
