@@ -92,7 +92,8 @@ def put_box_version(version):
 
     response = requests.put(
         url=f'http://{API_HOST}/boxes/version/',
-        json=boxVersion
+        json=boxVersion,
+        headers=headers
     )
     try:
         response.raise_for_status()
