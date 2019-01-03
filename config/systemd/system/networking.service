@@ -15,7 +15,7 @@ WantedBy=network-online.target
 Type=oneshot
 EnvironmentFile=-/etc/default/networking
 ExecStartPre=-/bin/sh -c '[ "$CONFIGURE_INTERFACES" != "no" ] && [ -n "$(ifquery --read-environment --list --exclude=lo)" ] && udevadm settle'
-ExecStart=/sbin/ifup -a --allow hotplug;/sbin/ifup -a
+ExecStart=/bin/sh -c '/sbin/ifup -a --allow hotplug;/sbin/ifup -a'
 ExecStop=/sbin/ifdown -a --read-environment --exclude=lo
 RemainAfterExit=true
 TimeoutStartSec=5min
