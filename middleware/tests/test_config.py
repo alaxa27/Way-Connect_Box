@@ -100,7 +100,7 @@ class TestConfig(TestCase):
     def test_get_config_files(self):
         """Should retrieve the right paths associated with the right key."""
         remoteConfig = {
-            'A': 2,
+            'A': 1,
             'FILES_A': 'a;b;c',
             'SERVICES_A': 'd;e;f',
             'FILES_B': 'r;t;y'
