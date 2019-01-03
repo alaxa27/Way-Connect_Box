@@ -10,7 +10,7 @@ iface lo inet loopback
 allow-hotplug WC_INTERFACE_IN
 iface WC_INTERFACE_IN inet dhcp
 
-auto WC_INTERFACE_OUT
+allow-hotplug WC_INTERFACE_OUT
 iface WC_INTERFACE_OUT inet static
     pre-up ipset restore -! < /etc/ipset.ipv4.nat
     pre-up iptables-restore < /etc/iptables.ipv4.nat
