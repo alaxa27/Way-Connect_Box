@@ -101,9 +101,10 @@ def put_box_version(version):
         raise PutVersionError(version)
 
 
-def rerun_script():
+def rerun_script(repoPath):
+    scriptPath = f'{repoPath}/middleware/recurrent_tasks.py'
     try:
-        os.execv(__file__, sys.argv)
+        os.execv(scriptPath, sys.argv)
     except OSError:
         raise RerunScriptError()
 
@@ -166,7 +167,7 @@ def run_update(repoPath, config):  # noqa: C901
 
     print('---> Running latest recurrent tasks:')
     try:
-        rerun_script()
+        rerun_script(repoPath)
     except RerunScriptError:
         print('---> Failed to run latest recurrent tasks.')
         raise RunUpdateError()
