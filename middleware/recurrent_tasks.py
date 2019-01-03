@@ -1,42 +1,23 @@
 #!/usr/bin/env python3.7
-from config import apply_config, fetch_config, save_config
-from config import ApplyConfigError, FetchConfigError, SaveConfigError
+from config import (
+    apply_config,
+    fetch_config,
+    save_config
+    )
+from config import (
+    ApplyConfigError,
+    FetchConfigError,
+    SaveConfigError
+    )
 from crontab import apply_crontab
 from crontab import ApplyCrontabError
 from status import post_service_status, post_error_status
 from status import PostServiceStatusError
 from update import run_update
 from update import RunUpdateError
-from utils import reboot
 
 
 homePath = '/home/pi'
-
-configFilesLocations = {
-    'INTERFACE_IN': [
-        '/iptables.ipv4.nat',
-        '/network/interfaces'
-    ],
-    'INTERFACE_OUT': [
-        '/nodogsplash/nodogsplash.conf',
-        '/dnsmasq.conf',
-        '/iptables.ipv4.nat',
-        '/network/interfaces'
-    ],
-    'PORTAL_HOST': [
-        '/nginx/sites-enabled/storage_reverse_proxy.conf',
-        '/nginx/sites-enabled/portal_reverse_proxy.conf'
-    ],
-    'ESTABLISHMENT_NAME': [
-        '/hostapd/hostapd.conf'
-    ],
-    'NDS_CLIENT_FORCE_TIMEOUT': [
-        '/nodogsplash/nodogsplash.conf'
-    ],
-    'NGROK_SUBDOMAIN': [
-        '/ngrok.yml'
-    ]
-}
 
 if __name__ == '__main__':
     envFile = f'{homePath}/env'
@@ -51,17 +32,18 @@ if __name__ == '__main__':
     except FetchConfigError:
         post_error_status('config')
     print('------------------------------------------')
+
     print('----------------Run Update----------------')
     try:
-        updateStatus = run_update(repoPath, remoteConfig)
+        run_update(repoPath, remoteConfig)
     except RunUpdateError:
         post_error_status('update')
     print('------------------------------------------')
 
-    if currentConfig != remoteConfig or updateStatus:
+    if currentConfig != remoteConfig:
         print('---------------Apply Config---------------')
         try:
-            apply_config(remoteConfig, configFilesLocations, configDir, etcDir)
+            apply_config(remoteConfig, currentConfig, configDir, etcDir)
         except ApplyConfigError:
             post_error_status('config')
         print('------------------------------------------')
@@ -79,7 +61,6 @@ if __name__ == '__main__':
         except SaveConfigError:
             post_error_status('config')
         print('------------------------------------------')
-        reboot()
 
     print('------------Post Service Status-----------')
     try:

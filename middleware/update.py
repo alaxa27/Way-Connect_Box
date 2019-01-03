@@ -3,6 +3,7 @@ import git
 import os
 from pathlib import Path
 import requests
+import sys
 
 from config import get_config_key
 from config import MissingKeyInConfig
@@ -30,6 +31,10 @@ class PutVersionError(Exception):
 
 
 class RunUpdateError(Exception):
+    pass
+
+
+class RerunScriptError(Exception):
     pass
 
 
@@ -68,7 +73,7 @@ def get_last_commit(repo, branch):
     return str(repo.commit(f'origin/{branch}'))
 
 
-def put_box_version(commitHash):
+def put_box_version(version):
     envPath = Path('/home/pi')
     load_dotenv(dotenv_path=envPath / 'env', override=True)
     API_HOST = os.environ['API_HOST']
@@ -76,7 +81,7 @@ def put_box_version(commitHash):
     API_SECRET = os.environ['API_SECRET']
 
     boxVersion = {}
-    boxVersion['commit_hash'] = commitHash
+    boxVersion['commit_hash'] = version
 
     signature = sign(API_KEY, API_SECRET, boxVersion)
 
@@ -85,13 +90,23 @@ def put_box_version(commitHash):
     headers['X-API-Key'] = API_KEY
     headers['X-API-Sign'] = signature
 
+    response = requests.put(
+        url=f'http://{API_HOST}/boxes/version/',
+        json=boxVersion,
+        headers=headers
+    )
     try:
-        requests.put(
-            url=f'http://{API_HOST}/portal/boxes/version/',
-            json=boxVersion
-        )
-    except Exception:
-        raise PutVersionError()
+        response.raise_for_status()
+    except requests.HTTPError:
+        raise PutVersionError(version)
+
+
+def rerun_script(repoPath):
+    scriptPath = f'{repoPath}/middleware/recurrent_tasks.py'
+    try:
+        os.execv(scriptPath, sys.argv)
+    except OSError:
+        raise RerunScriptError()
 
 
 def run_update(repoPath, config):  # noqa: C901
@@ -115,6 +130,7 @@ def run_update(repoPath, config):  # noqa: C901
     try:
         check_branch_exist(repo, branch)
     except BranchDoesNotExist:
+        print('FAIL')
         raise RunUpdateError()
     except HeadAlreadyExists:
         pass
@@ -145,6 +161,13 @@ def run_update(repoPath, config):  # noqa: C901
     try:
         put_box_version(commit)
     except PutVersionError:
+        print('FAIL')
         raise RunUpdateError()
     print('OK')
-    return True
+
+    print('---> Running latest recurrent tasks:')
+    try:
+        rerun_script(repoPath)
+    except RerunScriptError:
+        print('---> Failed to run latest recurrent tasks.')
+        raise RunUpdateError()

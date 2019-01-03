@@ -6,7 +6,7 @@ import requests
 import shutil
 import subprocess
 
-from utils import sign
+import utils
 
 
 class ApplyConfigError(Exception):
@@ -26,6 +26,10 @@ class FetchEstablishmentError(Exception):
 
 
 class GetCurrentConfigError(Exception):
+    pass
+
+
+class GetListFromConfigError(Exception):
     pass
 
 
@@ -49,6 +53,14 @@ class ReloadDaemonsError(Exception):
     pass
 
 
+class RestartServicesError(Exception):
+    pass
+
+
+class RestartUpdatedServicesError(Exception):
+    pass
+
+
 class RemoveFolderError(Exception):
     pass
 
@@ -57,7 +69,7 @@ class WriteConfigError(Exception):
     pass
 
 
-def apply_config(config, configFiles, configDir, configDestination):
+def apply_config(config, currentConfig, configDir, configDestination): # noqa:C901
     tmpPath = '/tmp/wayboxconfigdir'
 
     print('Removing old temporary folder...', end='')
@@ -72,6 +84,14 @@ def apply_config(config, configFiles, configDir, configDestination):
     try:
         copy_default_config(configDir, tmpPath)
     except CopyConfigError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Generating config files list...', end='')
+    try:
+        configFiles = get_list_from_config(config, 'FILES')
+    except GetListFromConfigError:
         print('FAIL')
         raise ApplyConfigError()
     print('OK')
@@ -95,10 +115,26 @@ def apply_config(config, configFiles, configDir, configDestination):
         raise ApplyConfigError()
     print('OK')
 
-    print('Reloading all daemons...', end='')
+    print('Reload daemons...', end='')
     try:
         reload_daemons()
     except ReloadDaemonsError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Generating config services list...', end='')
+    try:
+        configServices = get_list_from_config(config, 'SERVICES')
+    except GetListFromConfigError:
+        print('FAIL')
+        raise ApplyConfigError
+    print('OK')
+
+    print('Restarting updated services...', end='')
+    try:
+        restart_updated_services(config, currentConfig, configServices)
+    except RestartUpdatedServicesError:
         print('FAIL')
         raise ApplyConfigError()
     print('OK')
@@ -145,6 +181,20 @@ def get_config_key(config, key):
     return value
 
 
+def get_list_from_config(config, occurence):
+    result = {}
+    for k, v in config.items():
+        splitKey = k.split('_')
+        if splitKey[0] == occurence:
+            try:
+                key = '_'.join(splitKey[1:])
+            except IndexError:
+                raise GetListFromConfigError(f'{occurence}: {k}')
+            value = v.split(';')
+            result[key] = value
+    return result
+
+
 def get_current_config(configPath):
     return main.dotenv_values(configPath)
 
@@ -156,7 +206,7 @@ def get_remote_config():
     API_SECRET = os.environ['API_SECRET']
     apiHost = 'api.way-connect.com'
 
-    signature = sign(API_KEY, API_SECRET, {})
+    signature = utils.sign(API_KEY, API_SECRET, {})
     headers = {}
     headers['Host'] = apiHost
     headers['X-API-Key'] = API_KEY
@@ -201,10 +251,48 @@ def reload_daemons():
 def remove_folder(path):
     try:
         shutil.rmtree(path, ignore_errors=True)
-    except OSError: 
+    except OSError:
         raise RemoveFolderError()
     except FileNotFoundError:
         pass
+
+
+def restart_services(services):
+    for service in services:
+        if service == 'monit':
+            try:
+                subprocess.call(['monit', 'reload'])
+            except subprocess.SubprocessError:
+                raise RestartServicesError(f'monit reload')
+        if service == 'reboot':
+            utils.reboot()
+        try:
+            subprocess.call(['systemctl', 'restart', service])
+        except subprocess.SubprocessError:
+            raise RestartServicesError(service)
+
+
+def restart_updated_services(remote, current, configServices):
+    for k, services in configServices.items():
+        try:
+            remoteValue = get_config_key(remote, k)
+        except MissingKeyInConfig:
+            raise RestartUpdatedServicesError()
+
+        try:
+            currentValue = get_config_key(current, k)
+        except MissingKeyInConfig:
+            try:
+                restart_services(services)
+            except RestartServicesError:
+                raise RestartUpdatedServicesError()
+            continue
+
+        if currentValue != remoteValue:
+            try:
+                restart_services(services)
+            except RestartServicesError:
+                raise RestartUpdatedServicesError()
 
 
 def replace_occurences(key, value, fileLocation):
@@ -231,7 +319,7 @@ def save_config(config, configPath):
 def write_config(config, configFiles, configDir):
     for var in configFiles:
         if var not in config:
-            raise MissingConfigOnServer()
+            raise MissingConfigOnServer(f'key: {var}')
 
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:
