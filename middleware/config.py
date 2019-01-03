@@ -291,6 +291,7 @@ def restart_updated_services(remote, current, services):
             except RestartServicesError:
                 raise RestartUpdatedServicesError()
             continue
+
         if currentConfig != remoteConfig:
             try:
                 restart_services(service)

@@ -32,6 +32,7 @@ if __name__ == '__main__':
     except FetchConfigError:
         post_error_status('config')
     print('------------------------------------------')
+
     print('----------------Run Update----------------')
     try:
         updateStatus = run_update(repoPath, remoteConfig)
@@ -39,7 +40,7 @@ if __name__ == '__main__':
         post_error_status('update')
     print('------------------------------------------')
 
-    if currentConfig != remoteConfig or updateStatus:
+    if currentConfig != remoteConfig:
         print('---------------Apply Config---------------')
         try:
             apply_config(remoteConfig, currentConfig, configDir, etcDir)
