@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     print('----------------Run Update----------------')
     try:
-        updateStatus = run_update(repoPath, remoteConfig)
+        run_update(repoPath, remoteConfig)
     except RunUpdateError:
         post_error_status('update')
     print('------------------------------------------')

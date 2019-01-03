@@ -3,6 +3,7 @@ import git
 import os
 from pathlib import Path
 import requests
+import sys
 
 from config import get_config_key
 from config import MissingKeyInConfig
@@ -30,6 +31,10 @@ class PutVersionError(Exception):
 
 
 class RunUpdateError(Exception):
+    pass
+
+
+class RerunScriptError(Exception):
     pass
 
 
@@ -95,6 +100,13 @@ def put_box_version(version):
         raise PutVersionError(version)
 
 
+def rerun_script():
+    try:
+        os.execv(__file__, sys.argv)
+    except OSError:
+        raise RerunScriptError()
+
+
 def run_update(repoPath, config):  # noqa: C901
     repo = git.Repo(repoPath)
 
@@ -151,4 +163,9 @@ def run_update(repoPath, config):  # noqa: C901
         raise RunUpdateError()
     print('OK')
 
-    print('---> Running last recurrent tasks:')
+    print('---> Running latest recurrent tasks:')
+    try:
+        rerun_script()
+    except RerunScriptError:
+        print('---> Failed to run latest recurrent tasks.')
+        raise RunUpdateError()
