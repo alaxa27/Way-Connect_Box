@@ -91,7 +91,7 @@ def put_box_version(version):
     headers['X-API-Sign'] = signature
 
     response = requests.put(
-        url=f'http://{API_HOST}/portal/boxes/version/',
+        url=f'http://{API_HOST}/boxes/version/',
         json=boxVersion
     )
     try:
