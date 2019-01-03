@@ -45,10 +45,6 @@ class MissingKeyInConfig(Exception):
     pass
 
 
-class MissingKeyInConfigInfo(Exception):
-    pass
-
-
 class SaveConfigError(Exception):
     pass
 
@@ -276,25 +272,25 @@ def restart_services(services):
             raise RestartServicesError(service)
 
 
-def restart_updated_services(remote, current, services):
-    for k, remoteConfig in remote.items():
+def restart_updated_services(remote, current, configServices):
+    for k, services in configServices.items():
         try:
-            service = services[k]
-        except KeyError:
-            raise MissingKeyInConfigInfo(f'key: {k}')
+            remoteValue = get_config_key(remote, k)
+        except MissingKeyInConfig:
+            raise RestartUpdatedServicesError()
 
         try:
-            currentConfig = current[k]
-        except KeyError:
+            currentValue = get_config_key(current, k)
+        except MissingKeyInConfig:
             try:
-                restart_services(service)
+                restart_services(services)
             except RestartServicesError:
                 raise RestartUpdatedServicesError()
             continue
 
-        if currentConfig != remoteConfig:
+        if currentValue != remoteValue:
             try:
-                restart_services(service)
+                restart_services(services)
             except RestartServicesError:
                 raise RestartUpdatedServicesError()
 

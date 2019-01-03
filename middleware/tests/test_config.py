@@ -50,19 +50,39 @@ class TestConfig(TestCase):
         config.restart_updated_services(new, old, services)
         restartMock.assert_called_once_with('serviceB')
 
-    def test_restart_config_service_not_in_info(self):
-        """If a service needs to be restarted but is not present in the infos
-        it should raise the appropriate error."""
+    @patch('config.restart_services')
+    def test_restart_config_service_not_in_info(self, restartMock):
+        """If a service needs to be restarted but is not present in the infos\
+        nothing should happen.""" 
         old = {
             'A': 0
         }
         new = {
-            'A': 1
+            'A': 1,
+            'B': 3
         }
         services = {
         }
+
+        try:
+            config.restart_updated_services(new, old, services)
+        except config.RestartUpdatedServicesError:
+            self.fail('It should not raise RestartUpdateServicesError')
+
+        restartMock.assert_not_called()
+
+    def test_restart_remote_key_not_exist(self):
+        """If a service is present in the configInfo but not on the remote, it\
+        should raise a RestartUpdateServicesError"""
+        old = {}
         
-        with self.assertRaises(config.MissingKeyInConfigInfo):
+        new = {}
+
+        services = {
+            'A': 'serviceA'
+        }
+
+        with self.assertRaises(config.RestartUpdatedServicesError):
             config.restart_updated_services(new, old, services)
 
     @patch('subprocess.call')
