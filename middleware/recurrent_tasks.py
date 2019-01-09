@@ -60,7 +60,7 @@ if __name__ == '__main__':
         post_error_status('update')
     print('------------------------------------------')
 
-    updateConfig = args['update-config']
+    updateConfig = args['update_config']
     if currentConfig != remoteConfig or updateConfig:
         print('---------------Apply Config---------------')
         try:
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             post_error_status('config')
         print('------------------------------------------')
 
-    postStatus = args['post-status']
+    postStatus = args['post_status']
     if postStatus:
         print('------------Post Service Status-----------')
         try:
