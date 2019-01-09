@@ -1,4 +1,5 @@
 #!/usr/bin/env python3.7
+import argparse
 from config import (
     apply_config,
     fetch_config,
@@ -15,9 +16,28 @@ from status import post_service_status, post_error_status
 from status import PostServiceStatusError
 from update import run_update
 from update import RunUpdateError
+from utils import reboot
 
 
 homePath = '/home/pi'
+
+parser = argparse.ArgumentParser(description='WayBox vital tasks programm.')
+parser.add_argument(
+    '--update-config',
+    action='store_true',
+    help='downloads and updates config from back-end'
+)
+parser.add_argument(
+    '--post-status',
+    action='store_true',
+    help='post box status to back-end'
+)
+parser.add_argument(
+    '--reboot',
+    action='store_true',
+    help='reboot the WayBox'
+)
+args = vars(parser.parse_args())
 
 if __name__ == '__main__':
     envFile = f'{homePath}/env'
@@ -40,7 +60,8 @@ if __name__ == '__main__':
         post_error_status('update')
     print('------------------------------------------')
 
-    if currentConfig != remoteConfig:
+    updateConfig = args['update-config']
+    if currentConfig != remoteConfig or updateConfig:
         print('---------------Apply Config---------------')
         try:
             apply_config(remoteConfig, currentConfig, configDir, etcDir)
@@ -62,9 +83,15 @@ if __name__ == '__main__':
             post_error_status('config')
         print('------------------------------------------')
 
-    print('------------Post Service Status-----------')
-    try:
-        post_service_status()
-    except PostServiceStatusError:
-        post_error_status('status')
-    print('------------------------------------------')
+    postStatus = args['post-status']
+    if postStatus:
+        print('------------Post Service Status-----------')
+        try:
+            post_service_status()
+        except PostServiceStatusError:
+            post_error_status('status')
+        print('------------------------------------------')
+    
+    rebootArg = args['reboot']
+    if rebootArg:
+        reboot()
