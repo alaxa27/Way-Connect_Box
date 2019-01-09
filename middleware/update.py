@@ -104,7 +104,7 @@ def put_box_version(version):
 def rerun_script(repoPath):
     scriptPath = f'{repoPath}/middleware/recurrent_tasks.py'
     try:
-        os.execv(scriptPath, sys.argv)
+        os.execv(scriptPath, sys.argv + ['--update-config', '--reboot'])
     except OSError:
         raise RerunScriptError()
 

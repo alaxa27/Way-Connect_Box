@@ -67,13 +67,13 @@ def ssh_connect(url, user=None, port=22):
         )
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     key = args['key']
     serverUrl = args['server']
 
     resp = requests.get(f'http://{key}.{serverUrl}:8000/api/tunnels')
 
-    data = resp.json() #json.loads(resp.json)
+    data = resp.json() # json.loads(resp.json)
     tunnels = data['Tunnels']
     if args['verbose']:
         print(json.dumps(tunnels, indent=4, sort_keys=True))
