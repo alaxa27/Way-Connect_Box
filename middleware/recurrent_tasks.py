@@ -18,7 +18,6 @@ from update import run_update
 from update import RunUpdateError
 from utils import reboot
 
-
 homePath = '/home/pi'
 
 parser = argparse.ArgumentParser(description='WayBox vital tasks programm.')
