@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import io
 import json
 import requests
 import subprocess
@@ -44,6 +45,12 @@ parser.add_argument(
         help='explain what is being done'
         )
 
+parser.add_argument(
+        '--run-command',
+        type=str,
+        help='runs command remotely and print output to STDOUT'
+        )
+
 args = vars(parser.parse_args())
 
 
@@ -67,6 +74,16 @@ def ssh_connect(url, user=None, port=22):
         )
 
 
+def ssh_run_command(url, command, user=None, port=22):
+    if user:
+        url = f'{user}@{url}'
+    command = ['ssh', '-p', port, url, command]
+
+    proc = subprocess.Popen(command, stdout=subprocess.PIPE)
+    for line in io.TextIOWrapper(proc.stdout, encoding="utf-8"): 
+        print(line)
+
+
 if __name__ == '__main__':
     key = args['key']
     serverUrl = args['server']
@@ -87,6 +104,13 @@ if __name__ == '__main__':
             if args['verbose']:
                 print(f'Port: {sshPort}')
                 print(f'URL: {url}')
+            if args['run_command']:
+                ssh_run_command(
+                        url,
+                        args['run_command'],
+                        user=args['user'],
+                        port=sshPort
+                        )
             if args['connect']:
                 ssh_connect(url, user=args['user'], port=sshPort)
 
