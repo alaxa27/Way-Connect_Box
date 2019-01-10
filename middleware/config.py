@@ -328,8 +328,8 @@ def write_config(config, configFiles, configDir):
             raise MissingConfigOnServer(f'key: {var}')
 
     for varName, fileLocations in configFiles.items():
+        varValue = replace_occurence(config[varName], config)
         for fileLocation in fileLocations:
-            varValue = replace_occurence(config[varName], config)
             try:
                 replace_occurences(
                     varName,
