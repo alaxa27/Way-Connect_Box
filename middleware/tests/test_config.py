@@ -129,3 +129,24 @@ class TestConfig(TestCase):
             'C': ['p', 'o', 'g']
         }
         self.assertEqual(configFiles, expectedResult)
+
+    def test_replace_occurence(self):
+        """Should replace vars in config value. no matter what is the key."""
+        remoteConfig = {
+            'A': 'RTY',
+            'B': 'AZE',
+            'C': 'tres'
+        }
+        string1 = 'ZERTYGOIJFEPKA'
+        expectedResult1 = string1
+
+        newString1 = config.replace_occurence(string1, remoteConfig)
+         
+        string2 = 'YIUBOWC_BIHU_FNEKWC_POZ'
+        expectedResult2 = 'YIUBOAZEIHU_FNEKWC_POZ' 
+
+        newString2 = config.replace_occurence(string2, remoteConfig)
+
+        self.assertEqual(newString1, expectedResult1)
+        self.assertEqual(newString2, expectedResult2)
+    

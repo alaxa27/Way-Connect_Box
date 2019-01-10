@@ -251,10 +251,10 @@ def reload_daemons():
 def remove_folder(path):
     try:
         shutil.rmtree(path, ignore_errors=True)
-    except OSError:
-        raise RemoveFolderError()
     except FileNotFoundError:
         pass
+    except OSError:
+        raise RemoveFolderError()
 
 
 def restart_services(services):
@@ -295,6 +295,12 @@ def restart_updated_services(remote, current, configServices):
                 raise RestartUpdatedServicesError()
 
 
+def replace_occurence(string, config):
+    for key, val in config.items():
+        string = string.replace(f'WC_{key}', config[key])
+    return string
+
+
 def replace_occurences(key, value, fileLocation):
     with fileinput.FileInput(fileLocation, inplace=True) as file:
         for line in file:
@@ -323,10 +329,11 @@ def write_config(config, configFiles, configDir):
 
     for varName, fileLocations in configFiles.items():
         for fileLocation in fileLocations:
+            varValue = replace_occurence(config[varName], config)
             try:
                 replace_occurences(
                     varName,
-                    config[varName],
+                    varValue,
                     configDir+fileLocation
                     )
             except Exception:
