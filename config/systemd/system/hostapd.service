@@ -8,6 +8,7 @@ Type=forking
 EnvironmentFile=/home/pi/env
 ExecStartPre=/bin/sh -c 'if [ $INTERFACE_OUT != "wlan0" ] && [ $INTERFACE_OUT != "wlan1" ]; then exit -1; fi'
 ExecStart=/usr/sbin/hostapd -B -P /run/hostapd.pid /etc/hostapd/hostapd.conf
+ExecStop-=/sbin/start-stop-daemon --quiet --stop --retry QUIT/5 --pidfile /run/hostapd.pid
 Restart=on-failure
 
 [Install]
