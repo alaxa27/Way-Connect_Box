@@ -4,12 +4,19 @@ After=syslog.target network.target
 
 [Service]
 Type=simple
+PIDFile=/run/ngrok.pid
 PrivateTmp=true
 Restart=always
 RestartSec=1min
 StandardOutput=null
 StandardError=null
-ExecStart=/home/pi/Way-Connect_Box/ngrok -config=/etc/ngrok.yml start-all
+ExecStart=/sbin/start-stop-daemon \
+          --start \
+          --background \
+          --make-pidfile \
+          --pidfile /run/ngrok.pid \
+          --exec /home/pi/Way-Connect_Box/ngrok \
+          -- -config=/etc/ngrok.yml start-all
 ExecStop=/usr/bin/killall ngrok
 
 [Install]

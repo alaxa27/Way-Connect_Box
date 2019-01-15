@@ -3,11 +3,13 @@ Description=Unicorn Daemon for middleware
 After=network.target
 
 [Service]
+PIDFile=/run/middleware.pid
 User=root
 Group=www-data
 WorkingDirectory=/home/pi/Way-Connect_Box/middleware
 EnvironmentFile=/home/pi/env
-ExecStart=/usr/local/bin/gunicorn --workers 2 --bind unix:/home/pi/Way-Connect_Box/middleware/middleware.sock wsgi:app
+ExecStart=/usr/local/bin/gunicorn --pid /run/middleware.pid --workers 2 \
+          --bind unix:/home/pi/Way-Connect_Box/middleware/middleware.sock wsgi:app
 
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
