@@ -150,3 +150,18 @@ class TestConfig(TestCase):
         self.assertEqual(newString1, expectedResult1)
         self.assertEqual(newString2, expectedResult2)
     
+    @patch('config.remove_folder')
+    @patch('os.remove')
+    @patch('glob.glob')
+    def test_remove_cache(self, globMock, osRemoveMock, removeFolderMock):
+        """Should remove file from cache and also directories"""
+        def remove(path):
+            if path == './b':
+                raise IsADirectoryError()
+
+        cacheFiles = ['./a', './b', './c']
+
+        globMock.return_value = cacheFiles
+        osRemoveMock.side_effect = remove
+        config.remove_cache()
+        removeFolderMock.assert_called_once_with('./b')

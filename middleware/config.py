@@ -1,5 +1,6 @@
 from dotenv import load_dotenv, main
 import fileinput
+import glob
 import os
 from pathlib import Path
 import requests
@@ -46,6 +47,10 @@ class MissingKeyInConfig(Exception):
 
 
 class SaveConfigError(Exception):
+    pass
+
+
+class RemoveCacheError(Exception):
     pass
 
 
@@ -119,6 +124,14 @@ def apply_config(config, currentConfig, configDir, configDestination): # noqa:C9
     try:
         reload_daemons()
     except ReloadDaemonsError:
+        print('FAIL')
+        raise ApplyConfigError()
+    print('OK')
+
+    print('Removing nginx cache...', end='')
+    try:
+        remove_cache()
+    except RemoveCacheError:
         print('FAIL')
         raise ApplyConfigError()
     print('OK')
@@ -248,6 +261,21 @@ def reload_daemons():
         raise ReloadDaemonsError()
 
 
+def remove_cache():
+    cachePath = '/var/nginx/cache'
+    cacheFiles = glob.glob(f'{cachePath}/*')
+    for file in cacheFiles:
+        try:
+            os.remove(file)
+        except IsADirectoryError:
+            try:
+                remove_folder(file)
+            except RemoveFolderError:
+                raise RemoveCacheError()
+        except OSError:
+            raise RemoveCacheError(file)
+
+
 def remove_folder(path):
     try:
         shutil.rmtree(path, ignore_errors=True)
@@ -255,6 +283,18 @@ def remove_folder(path):
         pass
     except OSError:
         raise RemoveFolderError()
+
+
+def replace_occurence(string, config):
+    for key, _ in config.items():
+        string = string.replace(f'WC_{key}', config[key])
+    return string
+
+
+def replace_occurences(key, value, fileLocation):
+    with fileinput.FileInput(fileLocation, inplace=True) as file:
+        for line in file:
+            print(line.replace(f'WC_{key}', value), end='')
 
 
 def restart_services(services):
@@ -293,18 +333,6 @@ def restart_updated_services(remote, current, configServices):
                 restart_services(services)
             except RestartServicesError:
                 raise RestartUpdatedServicesError()
-
-
-def replace_occurence(string, config):
-    for key, val in config.items():
-        string = string.replace(f'WC_{key}', config[key])
-    return string
-
-
-def replace_occurences(key, value, fileLocation):
-    with fileinput.FileInput(fileLocation, inplace=True) as file:
-        for line in file:
-            print(line.replace(f'WC_{key}', value), end='')
 
 
 def save_config(config, configPath):
