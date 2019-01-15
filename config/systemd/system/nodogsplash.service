@@ -8,8 +8,6 @@ Type=forking
 PIDFile=/run/nodogsplash.pid
 ExecStartPre=/bin/systemctl is-active nginx
 ExecStart=/usr/bin/nodogsplash -d 5 $OPTIONS
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
 RestartSec=1
 Restart=on-failure
 

@@ -4,7 +4,7 @@ StartLimitIntervalSec=0
 After=redis-server.service rabbitmq-server.service nodogsplash.service
 
 [Service]
-Type=forking
+Type=simple
 PIDFile=/run/nameko.pid
 User=root
 WorkingDirectory=/home/pi/Way-Connect_Box/middleware
@@ -14,14 +14,15 @@ ExecStartPre=/bin/systemctl is-active rabbitmq-server
 ExecStartPre=/bin/systemctl is-active nodogsplash
 ExecStart=/sbin/start-stop-daemon \
           --start \
+          --background \
           --make-pidfile \
           --pidfile /run/nameko.pid \
           --exec /usr/local/bin/nameko \
           -- run --config /home/pi/Way-Connect_Box/middleware/nameko.yaml ndsctl
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
+ExecStop=/usr/bin/killall nameko
 RestartSec=1
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+
