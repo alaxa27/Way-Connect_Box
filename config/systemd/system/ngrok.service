@@ -12,7 +12,6 @@ StandardOutput=null
 StandardError=null
 ExecStart=/sbin/start-stop-daemon \
           --start \
-          --background \
           --make-pidfile \
           --pidfile /run/ngrok.pid \
           --exec /home/pi/Way-Connect_Box/ngrok \

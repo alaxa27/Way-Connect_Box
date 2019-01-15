@@ -14,7 +14,6 @@ ExecStartPre=/bin/systemctl is-active rabbitmq-server
 ExecStartPre=/bin/systemctl is-active nodogsplash
 ExecStart=/sbin/start-stop-daemon \
           --start \
-          --background \
           --make-pidfile \
           --pidfile /run/nameko.pid \
           --exec /usr/local/bin/nameko \

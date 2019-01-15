@@ -9,7 +9,6 @@ PIDFile=/run/nodogsplash.pid
 ExecStartPre=/bin/systemctl is-active nginx
 ExecStart=/sbin/start-stop-daemon \
           --start \
-          --background \
           --make-pidfile \
           --pidfile /run/nodogsplash.pid \
           --exec /usr/bin/nodogsplash \
