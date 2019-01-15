@@ -5,7 +5,6 @@ StartLimitIntervalSec=0
 
 [Service]
 Type=forking
-PIDFile=/run/nodogsplash.pid
 ExecStartPre=/bin/systemctl is-active nginx
 ExecStart=/usr/bin/nodogsplash -d 5 $OPTIONS
 RestartSec=1
