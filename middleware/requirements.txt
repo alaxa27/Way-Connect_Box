@@ -18,7 +18,7 @@ idna==2.7
 importlib-metadata==0.7
 itsdangerous==0.24
 Jinja2==2.10
-kombu==4.2.2
+kombu==4.2.1
 MarkupSafe==1.0
 mccabe==0.6.1
 mock==2.0.0
