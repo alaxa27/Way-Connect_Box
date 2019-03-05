@@ -9,6 +9,14 @@ class AuthenticationFailed(Exception):
     pass
 
 
+class DeleteInactiveClientsError(Exception):
+    pass
+
+
+class DeleteInactiveConnectsError(Exception):
+    pass
+
+
 class NdsctlExecutionFailed(Exception):
     pass
 
@@ -57,9 +65,32 @@ class NdsctlService:
     def delete_inactive_clients(self, activeClients, storedClients):
         for storedClient in storedClients:
             try:
-                activeClients[storedClient]
+                storedClientip = storedClient.decode('utf-8').split(':')[1]
+            except IndexError:
+                raise DeleteInactiveClientsError(storedClient)
+            try:
+                activeClients[storedClientip]
             except KeyError:
                 self.redis.delete(storedClient)
+
+    def delete_inactive_connects(self, clients, connects):
+        for connect in connects:
+            try:
+                connectip = connect.decode('utf-8').split(':')[1]
+            except IndexError:
+                raise DeleteInactiveConnectsError(connect)
+            try:
+                clients[connectip]
+            except KeyError:
+                self.redis.delete(connect)
+
+    def fetch_connect(self, client):
+        return {'foo': 'bar'}
+
+    def fetch_set_connect(self, ip):
+        client = self.redis.get(f'client:{ip}')
+        connectResult = self.fetch_connect(client)
+        self.redis.set(f'connect:{ip}', str(connectResult))
 
     def get_clients(self):
         clients = []
@@ -75,18 +106,32 @@ class NdsctlService:
             client = eval(client)
             return client['mac'] 
         return '22:22:22:22:22:22'
+    
+    @rpc
+    def get_connect_from_ip(self, ip):
+        connect = f'connect:{ip}'
+        connectData = self.redis.get(connect)
+        if connectData:
+            return eval(connectData)
+
+        self.fetch_set_connect(ip)
+
+    def retrieve_preauth_from_active(self, clients):
+        preauthClients = {}
+        for clientIP, client in clients.items():
+            if client['state'] == 'Preauthenticated':
+                preauthClients[clientIP] = client
+
+        return preauthClients
 
     def retrieve_client_list(self, output):
         clients = output['clients']
         clientsObject = {}
 
-        for clientMac, clientInfo in clients.items():
-            client = {}
+        for _, clientInfo in clients.items():
+            client = clientInfo
             clientIP = clientInfo['ip']
 
-            client['mac'] = clientMac
-            client['ip'] = clientIP
-            client['token'] = clientInfo['token']
             clientsObject[clientIP] = client
 
         return clientsObject
@@ -94,6 +139,12 @@ class NdsctlService:
     def set_active_clients(self, clients):
         for clientIP, client in clients.items():
             self.redis.set(f'client:{clientIP}', str(client))
+
+    def set_active_connects(self, clients, connects):
+        for clientIP, client in clients.items():
+            connect = f'connect:{clientIP}'.encode('utf-8')
+            if connect not in connects:
+                self.fetch_set_connect(clientIP)
 
     @timer(interval=1)
     def update_clients(self):
@@ -106,3 +157,9 @@ class NdsctlService:
 
         self.delete_inactive_clients(activeClients, storedClients)
         self.set_active_clients(activeClients)
+        
+        connects = self.redis.scan_iter(match='connects:*')
+
+        preauthClients = self.retrieve_preauth_from_active(activeClients)
+        self.delete_inactive_connects(preauthClients, connects)
+        self.set_active_connects(preauthClients, connects)
