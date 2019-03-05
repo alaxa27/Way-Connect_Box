@@ -51,6 +51,29 @@ def authenticate():
     # res = jsonify(url=url)
     # return (res, 200)
 
+@app.route('/portal/box', methods=['GET'])
+def box():
+    return API_KEY
+
+@app.route('/portal/customers/connect/', methods=['POST'])
+def connect():
+    ip = get_ip_from_request(request)
+
+    try:
+        cacheStatus = request.headers['X-NoCache']
+    except KeyError:
+        if STAGE == "production":
+            with ServiceRpcProxy('ndsctl_service', NAMEKO_CONFIG) as proxy:
+                try:
+                    connectResult = proxy.get_connect_from_ip(str(ip))
+                except RemoteError:
+                    post_error_status('ndsctl', exit=False)
+                    return f'Error connecting: {ip}', 400
+                return connectResult
+
+    return make_signed_request('customers/connect/', request)
+
+
 
 @app.route(
     '/portal/',
@@ -64,9 +87,10 @@ def catch_all(path):
 
     print(request.headers)
     print(path)
-    if path == 'box':
-        return API_KEY
 
+    return make_signed_request(path, request)
+
+def make_signed_request(path, request):
     url = API_URL + path
 
     data = {}

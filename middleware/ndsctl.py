@@ -3,6 +3,7 @@ import subprocess
 from nameko.rpc import rpc
 from nameko.timer import timer
 from nameko_redis import Redis
+import requests
 
 
 class AuthenticationFailed(Exception):
@@ -85,7 +86,15 @@ class NdsctlService:
                 self.redis.delete(connect)
 
     def fetch_connect(self, client):
-        return {'foo': 'bar'}
+        headers = {
+            'X-Customer-Mac': client['mac'],
+            'X-NoCache': 'true'
+        }
+        response = requests.post(
+            url='http://localhost:5000/portal/customers/connect/',
+            headers=headers
+        )
+        return response
 
     def fetch_set_connect(self, ip):
         client = self.redis.get(f'client:{ip}')
