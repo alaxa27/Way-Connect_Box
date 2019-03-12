@@ -94,13 +94,19 @@ class NdsctlService:
             url='http://localhost:5000/portal/customers/connect/',
             headers=headers
         )
+
+        try:
+            repsonse.raise_for_status()
+        except requests.HTTPError:
+            return False
         response.encoding = 'utf-8'
         return response.text
 
     def fetch_set_connect(self, ip):
         client = self.redis.get(f'client:{ip}')
         connectResult = self.fetch_connect(client)
-        self.redis.set(f'connect:{ip}', str(connectResult))
+        if connectResult:
+            self.redis.set(f'connect:{ip}', str(connectResult))
         return connectResult
 
     def get_clients(self):
@@ -123,7 +129,7 @@ class NdsctlService:
         connect = f'connect:{ip}'
         connectData = self.redis.get(connect)
         if connectData:
-            return eval(connectData)
+            return connectData
 
         return self.fetch_set_connect(ip)
 

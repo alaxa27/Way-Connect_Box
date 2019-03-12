@@ -49,6 +49,26 @@ class TestNdsctlService(TestCase):
 
     #     self.assertEqual(result, expectedResult)
 
+    @patch('ndsctl.NdsctlService.fetch_connect')
+    def test_fetch_set_connect_fail(self, fetchConnectMock):
+        redisSetMock = self.service.redis.set
+        fetchConnectMock.return_value = False
+
+        response = self.service.fetch_set_connect('a')
+
+        redisSetMock.assert_not_called()
+        self.assertFalse(response)
+
+    @patch('ndsctl.NdsctlService.fetch_connect')
+    def test_fetch_set_connect_success(self, fetchConnectMock):
+        redisSetMock = self.service.redis.set
+        fetchConnectMock.return_value = 'foo'
+
+        response = self.service.fetch_set_connect('b')
+
+        redisSetMock.assert_called_once_with('connect:b', 'foo')
+        self.assertEqual(response, 'foo')
+
     def test_retrieve_preauth_from_active(self):
         activeClients = {
             'a': {

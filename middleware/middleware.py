@@ -69,7 +69,10 @@ def connect():
                 except RemoteError:
                     post_error_status('ndsctl', exit=False)
                     return f'Error connecting: {ip}', 400
-                return connectResult
+                if connectResult:
+                    return connectResult, 200
+                else:
+                    return f'Error in server response', 500
 
     return make_signed_request('customers/connect/', request)
 
