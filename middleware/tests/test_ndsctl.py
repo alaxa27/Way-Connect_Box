@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import call, patch
 from nameko.testing.services import worker_factory
 
 from ndsctl import NdsctlService
@@ -8,27 +8,6 @@ from ndsctl import NdsctlService
 class TestNdsctlService(TestCase):
     def setUp(self):
         self.service = worker_factory(NdsctlService)
-
-        self.setMock = self.service.redis.set
-        self.setMock.side_effect = self.add
-
-        self.deleteMock = self.service.redis.delete
-        self.deleteMock.side_effect = self.delete
-
-        self.activeClientsMock = {
-            '1': 'foo',
-            '2': 'bar',
-            '4': 'baz'
-        }
-        self.storedClientsMock = ['1', '2', '3']
-
-    def add(self, item, _):
-        index = item.replace('client:', '')
-        if index not in self.storedClientsMock:
-            self.storedClientsMock.append(index)
-
-    def delete(self, item):
-        self.storedClientsMock.pop(self.storedClientsMock.index(item))
 
     # def test_set_active_clients(self):
     #     self.service.set_active_clients(self.activeClientsMock)
@@ -115,7 +94,7 @@ class TestNdsctlService(TestCase):
             }
         }
         
-        connects = [b'connect:a', b'connect:c']
+        connects = [b'connect:b', b'connect:c']
 
         expectedResult = [b'connect:c']
         self.service.delete_inactive_connects(preauthClients, connects)
@@ -131,8 +110,8 @@ class TestNdsctlService(TestCase):
         fetchSetMock.side_effect = fetch_set
 
         preauthClients = {
-            'a': {
-                'bar': 'a'
+            'b': {
+                'bar': 'b'
             },
             'c': {
                 'bar': 'c'
@@ -164,4 +143,64 @@ class TestNdsctlService(TestCase):
         result = self.service.get_connect_from_ip('a')
 
         self.assertEqual(result, expectedResult)
+
+    def test_update_clients(self):
+        redisSetMock = self.service.redis.set
+        redisDeleteMock = self.service.redis.delete
+
+        storedClients = (c for c in [b'client:a', b'client:b'])
+        activeClients = {
+            'b': {
+                'bar': 'b'
+            },
+            'c': {
+                'bar': 'c'
+            }
+        }
+
+        self.service.update_clients(activeClients, storedClients)
+        
+        # test that setMock has been called with b and c
+        redisSetMock.assert_has_calls([
+            call('client:b', str(activeClients['b'])),
+            call('client:c', str(activeClients['c']))
+            ])
+
+        # test that deleteMock has been called with a
+        redisDeleteMock.assert_has_calls([call(b'client:a')])
+
+    @patch('ndsctl.NdsctlService.fetch_set_connect')
+    def test_update_connects(self, fetchSetMock):
+        redisDeleteMock = self.service.redis.delete
+
+        activeClients = {
+            'b': {
+                'bar': 'b',
+                'state': 'Preauthenticated'
+            },
+            'c': {
+                'bar': 'c',
+                'state': 'Preauthenticated'
+            },
+            'd': {
+                'bar': 'k'
+            },
+            'f': {
+                'bar': 'd',
+                'state': 'Authenticated'
+            },
+            'e': {
+                'bar': 'd',
+                'state': 'foo'
+            }
+        }
+
+        connects = [b'connect:a', b'connect:b']
+
+        self.service.update_connects(activeClients, connects)
+
+        # test that fetchSetMock called once with c
+        fetchSetMock.assert_called_once_with('c')
+        # test that deleteMock has calls a
+        redisDeleteMock.assert_has_calls([call(b'connect:a')])
 

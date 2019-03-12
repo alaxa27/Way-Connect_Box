@@ -66,8 +66,8 @@ class NdsctlService:
     def delete_inactive_clients(self, activeClients, storedClients):
         for storedClient in storedClients:
             try:
-                storedClientip = storedClient.decode('utf-8').split(':')[1]
-            except IndexError:
+                storedClientip = storedClient.decode('utf-8').replace('client:', '')
+            except UnicodeDecodeError:
                 raise DeleteInactiveClientsError(storedClient)
             try:
                 activeClients[storedClientip]
@@ -77,8 +77,8 @@ class NdsctlService:
     def delete_inactive_connects(self, clients, connects):
         for connect in connects:
             try:
-                connectip = connect.decode('utf-8').split(':')[1]
-            except IndexError:
+                connectip = connect.decode('utf-8').replace('connect:', '')
+            except UnicodeDecodeError:
                 raise DeleteInactiveConnectsError(connect)
             try:
                 clients[connectip]
@@ -94,12 +94,14 @@ class NdsctlService:
             url='http://localhost:5000/portal/customers/connect/',
             headers=headers
         )
-        return response
+        response.encoding = 'utf-8'
+        return response.text
 
     def fetch_set_connect(self, ip):
         client = self.redis.get(f'client:{ip}')
         connectResult = self.fetch_connect(client)
         self.redis.set(f'connect:{ip}', str(connectResult))
+        return connectResult
 
     def get_clients(self):
         clients = []
@@ -123,12 +125,16 @@ class NdsctlService:
         if connectData:
             return eval(connectData)
 
-        self.fetch_set_connect(ip)
+        return self.fetch_set_connect(ip)
 
     def retrieve_preauth_from_active(self, clients):
         preauthClients = {}
         for clientIP, client in clients.items():
-            if client['state'] == 'Preauthenticated':
+            try:
+                state = client['state']
+            except KeyError:
+                continue
+            if state == 'Preauthenticated':
                 preauthClients[clientIP] = client
 
         return preauthClients
@@ -155,20 +161,25 @@ class NdsctlService:
             if connect not in connects:
                 self.fetch_set_connect(clientIP)
 
-    @timer(interval=1)
-    def update_clients(self):
+    @timer(interval=2)
+    def update(self):
         try:
             output = self.call_ndsctl(['json'])
         except NdsctlExecutionFailed:
             raise UpdateClientsError()
         activeClients = self.retrieve_client_list(output)
-        storedClients = self.redis.scan_iter(match='client:*')
+        storedClients = list(self.redis.scan_iter(match='client:*'))
+        connects = list(self.redis.scan_iter(match='connect:*'))
 
+        self.update_clients(activeClients, storedClients)
+        self.update_connects(activeClients, connects)
+
+    def update_clients(self, activeClients, storedClients):
         self.delete_inactive_clients(activeClients, storedClients)
         self.set_active_clients(activeClients)
-        
-        connects = self.redis.scan_iter(match='connects:*')
 
+    def update_connects(self, activeClients, connects):
         preauthClients = self.retrieve_preauth_from_active(activeClients)
+
         self.delete_inactive_connects(preauthClients, connects)
         self.set_active_connects(preauthClients, connects)

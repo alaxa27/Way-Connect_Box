@@ -82,8 +82,6 @@ def connect():
     )
 @app.route('/portal/<path:path>', methods=['POST', 'GET', 'PATCH', 'PUT'])
 def catch_all(path):
-    ip = get_ip_from_request(request)
-    print(str(ip))
 
     print(request.headers)
     print(path)
@@ -91,6 +89,9 @@ def catch_all(path):
     return make_signed_request(path, request)
 
 def make_signed_request(path, request):
+    ip = get_ip_from_request(request)
+    print(str(ip))
+
     url = API_URL + path
 
     data = {}
