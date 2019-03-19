@@ -66,7 +66,7 @@ class NdsctlService:
     def delete_inactive_clients(self, activeClients, storedClients):
         for storedClient in storedClients:
             try:
-                storedClientip = storedClient.decode('utf-8').replace('client:', '')
+                storedClientip = storedClient.replace('client:', '')
             except UnicodeDecodeError:
                 raise DeleteInactiveClientsError(storedClient)
             try:
@@ -77,7 +77,7 @@ class NdsctlService:
     def delete_inactive_connects(self, clients, connects):
         for connect in connects:
             try:
-                connectip = connect.decode('utf-8').replace('connect:', '')
+                connectip = connect.replace('connect:', '')
             except UnicodeDecodeError:
                 raise DeleteInactiveConnectsError(connect)
             try:
