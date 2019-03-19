@@ -96,7 +96,7 @@ class NdsctlService:
         )
 
         try:
-            repsonse.raise_for_status()
+            response.raise_for_status()
         except requests.HTTPError:
             return False
         response.encoding = 'utf-8'
@@ -104,7 +104,7 @@ class NdsctlService:
 
     def fetch_set_connect(self, ip):
         client = self.redis.get(f'client:{ip}')
-        connectResult = self.fetch_connect(client)
+        connectResult = self.fetch_connect(eval(client))
         if connectResult:
             self.redis.set(f'connect:{ip}', str(connectResult))
         return connectResult
