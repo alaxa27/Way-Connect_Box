@@ -163,7 +163,7 @@ class NdsctlService:
 
     def set_active_connects(self, clients, connects):
         for clientIP, client in clients.items():
-            connect = f'connect:{clientIP}'.encode('utf-8')
+            connect = f'connect:{clientIP}'
             if connect not in connects:
                 self.fetch_set_connect(clientIP)
 
