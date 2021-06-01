@@ -36,7 +36,7 @@ requests==2.19.1
 six==1.11.0
 smmap2==2.0.5
 toml==0.10.0
-urllib3==1.23
+urllib3==1.26.5
 vine==1.1.4
 Werkzeug==0.14.1
 wrapt==1.10.11
